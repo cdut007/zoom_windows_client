@@ -1,0 +1,8 @@
+demo/视频会议/
+*.dll
+*.tlog
+*.obj
+*.exe
+*.db
+bin/
+demo/sdk_demo_v2/Debug/
