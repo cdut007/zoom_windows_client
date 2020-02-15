@@ -15,7 +15,7 @@ enum loginTabPage
 	login_UseSSO_Page,
 	login_JoinMeetingOnly_Page
 };
-
+DWORD WINAPI checkClick(LPVOID lpParamter);
 class CSDKLoginFlowUIEvent;
 class CSDKLoginUIMgr;
 class CSDKLoginCBHandler;
@@ -94,7 +94,7 @@ public:
 	void Show();
 	void Hide();
 	void Notify(TNotifyUI& msg);
-
+	void  setUri(const wstring& id, const wstring& name);
 	void DoWithoutLoginStartJoinMeetingBtnClick();
 public:
 	virtual void onMeetingStatusChanged(ZOOM_SDK_NAMESPACE::MeetingStatus status, int iResult = 0);
@@ -102,7 +102,7 @@ public:
 	virtual void onMeetingSecureKeyNotification(const char* key, int len, ZOOM_SDK_NAMESPACE::IMeetingExternalSecureKeyHandler* pHandler) {};
 	virtual void onMeetingParameterNotification(const ZOOM_SDK_NAMESPACE::MeetingParameter* meeting_param) {};
   
-protected:
+public:
 	CVerticalLayoutUI* m_WithoutLoginStartJoinMeetingPage;
 	CRichEditUI*	   m_editMeetingNumber;
 	CRichEditUI*	   m_editScreenName;
@@ -178,16 +178,19 @@ public:
 
 	CSDKDemoAppEvent* GetAppEvent();
 	void SetCurrentPage(CVerticalLayoutUI* current_) {m_currentPage = current_;}
-
+	void initCheckUri();
 	bool LogOut();
 	void ChangeUIforLoginFailed();
 	void ChangeUIforJoinFailed();
 
 	void NotifyAuthDone();
-
 	string parseUri(const string& request, const string& _url);
 	std::wstring s2ws(const std::string& s);
 	std::string ws2s(const std::wstring& ws);
+	unsigned char ToHex(unsigned char x);
+	unsigned char FromHex(unsigned char x);
+	std::string UrlEncode(const std::string& str);
+	std::string UrlDecode(const std::string& str);
 
 protected:
 	CPaintManagerUI m_PaintManager;

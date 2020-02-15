@@ -298,6 +298,13 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::Notify( TNotifyUI& msg )
 	}
 }
 
+void CSDKWithoutLoginStartJoinMeetingUIGroup::setUri(const wstring& id, const wstring& name) {
+	m_editMeetingNumber->SetText(id.c_str());
+	m_editMeetingNumber->Invalidate();
+	m_editScreenName->SetText(name.c_str());
+	m_editScreenName->Invalidate();
+}
+
 void CSDKWithoutLoginStartJoinMeetingUIGroup::DoWithoutLoginStartJoinMeetingBtnClick()
 {
 	if(NULL == m_editMeetingNumber  || NULL == m_editMeetingPassword || NULL == m_editScreenName )
@@ -713,6 +720,10 @@ void CSDKLoginUIMgr::InitWindow()
 	m_btnLoginWithSSO->SetVisible(false);
 	m_btnJoinMeetingOnly->SetVisible(false);
 	SwitchToPage(login_JoinMeetingOnly_Page);
+
+
+}
+void CSDKLoginUIMgr::initCheckUri(){
 	//check uri
 	LPWSTR *szArgList;
 	int argCount;
@@ -740,15 +751,34 @@ void CSDKLoginUIMgr::InitWindow()
 				string id = parseUri("id", url);
 				string name = parseUri("name", url);
 				wstring idStr = s2ws(id);
-				MessageBox(NULL, idStr.c_str(), L"Arglist contents", MB_OK);
-				//m_WithoutLoginStartJoinMeetingUIGroup.DoWithoutLoginStartJoinMeetingBtnClick();
+				wstring nameStr = s2ws(UrlDecode("%e9%99%88%e6%b3%b3%e5%90%9b"));
+				m_WithoutLoginStartJoinMeetingUIGroup.setUri(idStr, nameStr);
+				
+
+				
 				break;
 			}
 		}
 
 		LocalFree(szArgList);
 	}
+}
 
+DWORD WINAPI checkClick(LPVOID lpParamter)
+{
+	
+	CSDKWithoutLoginStartJoinMeetingUIGroup *p = (CSDKWithoutLoginStartJoinMeetingUIGroup*)lpParamter;
+	while (!p->m_parentFrame ||!p->m_editMeetingNumber)
+	{
+		Sleep(1000);
+	}
+	std::wstring MeetingNumber = p->m_editMeetingNumber->GetText().GetData();
+	if (MeetingNumber.size() > 0) {
+		p->DoWithoutLoginStartJoinMeetingBtnClick();
+	}
+
+	//MessageBox(NULL, _T("jinchan:reeeeee"), L"Arglist contents", MB_OK);
+	return 0L;
 }
 
 std::string CSDKLoginUIMgr::ws2s(const std::wstring& ws)
@@ -801,6 +831,63 @@ string CSDKLoginUIMgr::parseUri(const string& request, const string& _url) {
 	}
 }
 
+unsigned char CSDKLoginUIMgr::ToHex(unsigned char x)
+{
+	return  x > 9 ? x + 55 : x + 48;
+}
+
+unsigned char CSDKLoginUIMgr::FromHex(unsigned char x)
+{
+	unsigned char y;
+	if (x >= 'A' && x <= 'Z') y = x - 'A' + 10;
+	else if (x >= 'a' && x <= 'z') y = x - 'a' + 10;
+	else if (x >= '0' && x <= '9') y = x - '0';
+	else assert(0);
+	return y;
+}
+
+std::string CSDKLoginUIMgr::UrlEncode(const std::string& str)
+{
+	std::string strTemp = "";
+	size_t length = str.length();
+	for (size_t i = 0; i < length; i++)
+	{
+		if (isalnum((unsigned char)str[i]) ||
+			(str[i] == '-') ||
+			(str[i] == '_') ||
+			(str[i] == '.') ||
+			(str[i] == '~'))
+			strTemp += str[i];
+		else if (str[i] == ' ')
+			strTemp += "+";
+		else
+		{
+			strTemp += '%';
+			strTemp += ToHex((unsigned char)str[i] >> 4);
+			strTemp += ToHex((unsigned char)str[i] % 16);
+		}
+	}
+	return strTemp;
+}
+
+std::string CSDKLoginUIMgr::UrlDecode(const std::string& str)
+{
+	std::string strTemp = "";
+	size_t length = str.length();
+	for (size_t i = 0; i < length; i++)
+	{
+		if (str[i] == '+') strTemp += ' ';
+		else if (str[i] == '%')
+		{
+			assert(i + 2 < length);
+			unsigned char high = FromHex((unsigned char)str[++i]);
+			unsigned char low = FromHex((unsigned char)str[++i]);
+			strTemp += high * 16 + low;
+		}
+		else strTemp += str[i];
+	}
+	return strTemp;
+}
 
 void CSDKLoginUIMgr::Notify(TNotifyUI& msg)
 {
@@ -865,7 +952,7 @@ LRESULT CSDKLoginUIMgr::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		m_PaintManager.AttachDialog(pRoot);
 		m_PaintManager.AddNotifier(this);
 		InitWindow(); 
-
+		initCheckUri();
 		return lRes;
 	}
 	else if (uMsg == WM_CLOSE)
@@ -988,6 +1075,9 @@ void CSDKLoginUIMgr::ChangeUIforJoinFailed()
 
 void CSDKLoginUIMgr::NotifyAuthDone()
 {
+	HANDLE hThread = CreateThread(NULL, 0, checkClick, &m_WithoutLoginStartJoinMeetingUIGroup, 0, NULL);
+	CloseHandle(hThread);
+
 	ZOOM_SDK_NAMESPACE::IAuthService* auth_service = SDKInterfaceWrap::GetInst().GetAuthService();
 	if (auth_service
 		&& ZOOM_SDK_NAMESPACE::LOGIN_IDLE != auth_service->GetLoginStatus())
