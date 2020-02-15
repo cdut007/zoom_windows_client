@@ -728,6 +728,8 @@ void CSDKLoginUIMgr::initCheckUri(){
 	LPWSTR *szArgList;
 	int argCount;
 
+	
+
 	szArgList = CommandLineToArgvW(GetCommandLine(), &argCount);
 	if (szArgList == NULL)
 	{
@@ -743,15 +745,17 @@ void CSDKLoginUIMgr::initCheckUri(){
 		for (int i = 0; i < argCount; i++)
 		{
 			LPCWSTR w = szArgList[i];
-			wchar_t param[100] = { 0 };
-			wsprintf(param, w);
-			std::wstring strParam = param;
+			std::wstring strParam = w;
 			if (strParam.find(_T("jinchan:jinchan")) != wstring::npos) {
-				string url = ws2s(strParam);
-				string id = parseUri("id", url);
-				string name = parseUri("name", url);
-				wstring idStr = s2ws(id);
-				wstring nameStr = s2ws(UrlDecode("%e9%99%88%e6%b3%b3%e5%90%9b"));
+				//ShowErrorMessage(strParam.c_str());
+				wstring id = parseUri(_T("id"), strParam);
+				wstring name = parseUri(_T("name"), strParam);
+				wstring idStr = id;
+				wstring nameStr = UrlDecode(name);
+				//ShowErrorMessage(name.c_str());
+				OutputDebugString(_T("print name\n"));
+				OutputDebugString(nameStr.c_str());
+				OutputDebugString(_T("\n"));
 				m_WithoutLoginStartJoinMeetingUIGroup.setUri(idStr, nameStr);
 				
 
@@ -781,45 +785,72 @@ DWORD WINAPI checkClick(LPVOID lpParamter)
 	return 0L;
 }
 
-std::string CSDKLoginUIMgr::ws2s(const std::wstring& ws)
+std::string CSDKLoginUIMgr::ws2s(const std::wstring& wstr)
 {
-	std::string curLocale = setlocale(LC_ALL, NULL);        // curLocale = "C";
-	setlocale(LC_ALL, "chs");
-	const wchar_t* _Source = ws.c_str();
-	size_t _Dsize = 2 * ws.size() + 1;
-	char *_Dest = new char[_Dsize];
-	memset(_Dest, 0, _Dsize);
-	wcstombs(_Dest, _Source, _Dsize);
-	std::string result = _Dest;
-	delete[]_Dest;
-	setlocale(LC_ALL, curLocale.c_str());
-	return result;
+	std::string str;
+	int nLen = (int)wstr.length();
+	str.resize(nLen, ' ');
+	int nResult = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)wstr.c_str(), nLen, (LPSTR)str.c_str(), nLen, NULL, NULL);
+	if (nResult == 0)
+	{
+		return "";
+	}
+	return str;
 }
 
-std::wstring CSDKLoginUIMgr::s2ws(const std::string& s)
+std::wstring CSDKLoginUIMgr::s2ws(const std::string& str)
 {
-	setlocale(LC_ALL, "chs");
-	const char* _Source = s.c_str();
-	size_t _Dsize = s.size() + 1;
-	wchar_t *_Dest = new wchar_t[_Dsize];
-	wmemset(_Dest, 0, _Dsize);
-	mbstowcs(_Dest, _Source, _Dsize);
-	std::wstring result = _Dest;
-	delete[]_Dest;
-	setlocale(LC_ALL, "C");
-	return result;
+	int nSize = MultiByteToWideChar(CP_ACP, 0, (LPCSTR)str.c_str(), str.size(), 0, 0);
+	if (nSize <= 0) return NULL;
+	WCHAR *pwszDst = new WCHAR[nSize + 1];
+	if (NULL == pwszDst)
+		return NULL;
+	MultiByteToWideChar(CP_ACP, 0, (LPCSTR)str.c_str(), str.size(), pwszDst, nSize);
+	pwszDst[nSize] = 0;
+	if (pwszDst[0] == 0xFEFF) // skip Oxfeff
+		for (int i = 0; i < nSize; i++)
+			pwszDst[i] = pwszDst[i + 1];
+	wstring wcharString(pwszDst);
+	delete pwszDst;
+	return wcharString;
 }
 
+wstring CSDKLoginUIMgr::parseURL2(wstring str, wstring key)
+{
+	int i;
+	i = str.find_first_of(L"?");
+	if (i == string::npos) {
+		return wstring();
+	}
+	wstring s = str.substr(i);
+	int start = s.find(key);
+	int end = 0;
+	if (start != string::npos) {
+		end = s.find_first_of(L"&", start);
+		if (end != string::npos) {
+			start = s.find_first_of(L"=", start);
+			return s.substr(start+1, end);
+		}
+		else {
+			return wstring();
+		}
+	}
+	else {
+	
+		return wstring();
+	}
+	return wstring();
+}
 
-string CSDKLoginUIMgr::parseUri(const string& request, const string& _url) {
-	smatch result;
-	if (regex_search(_url.cbegin(), _url.cend(), result, regex(request + "=(.*?)&"))) {
+wstring CSDKLoginUIMgr::parseUri(const wstring& request, const wstring& _url) {
+	wsmatch result;
+	if (regex_search(_url.cbegin(), _url.cend(), result, wregex(request + _T("=(.*?)&")))) {
 		// 匹配具有多个参数的url
 
 		// *? 重复任意次，但尽可能少重复  
 		return result[1];
 	}
-	else if (regex_search(_url.cbegin(), _url.cend(), result, regex(request + "=(.*)"))) {
+	else if (regex_search(_url.cbegin(), _url.cend(), result, wregex(request + _T("=(.*)")))) {
 		// 匹配只有一个参数的url
 
 		return result[1];
@@ -827,7 +858,7 @@ string CSDKLoginUIMgr::parseUri(const string& request, const string& _url) {
 	else {
 		// 不含参数或制定参数不存在
 
-		return string();
+		return wstring();
 	}
 }
 
@@ -846,47 +877,85 @@ unsigned char CSDKLoginUIMgr::FromHex(unsigned char x)
 	return y;
 }
 
-std::string CSDKLoginUIMgr::UrlEncode(const std::string& str)
+std::string CSDKLoginUIMgr::UrlEncode(const std::string& szToEncode)
 {
-	std::string strTemp = "";
-	size_t length = str.length();
-	for (size_t i = 0; i < length; i++)
+	std::string src = szToEncode;
+	char hex[] = "0123456789ABCDEF";
+	string dst;
+
+
+	for (size_t i = 0; i < src.size(); ++i)
 	{
-		if (isalnum((unsigned char)str[i]) ||
-			(str[i] == '-') ||
-			(str[i] == '_') ||
-			(str[i] == '.') ||
-			(str[i] == '~'))
-			strTemp += str[i];
-		else if (str[i] == ' ')
-			strTemp += "+";
+		unsigned char cc = src[i];
+		if (cc >= 'A' && cc <= 'Z'
+			|| cc >= 'a' && cc <= 'z'
+			|| cc >= '0' && cc <= '9'
+			|| cc == '.'
+			|| cc == '_'
+			|| cc == '-'
+			|| cc == '*')
+		{
+			if (cc == ' ')
+			{
+				dst += "+";
+			}
+			else
+				dst += cc;
+		}
 		else
 		{
-			strTemp += '%';
-			strTemp += ToHex((unsigned char)str[i] >> 4);
-			strTemp += ToHex((unsigned char)str[i] % 16);
+			unsigned char c = static_cast<unsigned char>(src[i]);
+			dst += '%';
+			dst += hex[c / 16];
+			dst += hex[c % 16];
 		}
 	}
-	return strTemp;
+	return dst;
+	
 }
 
-std::string CSDKLoginUIMgr::UrlDecode(const std::string& str)
+std::wstring CSDKLoginUIMgr::UrlDecode(const std::wstring& text)
 {
-	std::string strTemp = "";
-	size_t length = str.length();
-	for (size_t i = 0; i < length; i++)
-	{
-		if (str[i] == '+') strTemp += ' ';
-		else if (str[i] == '%')
+		std::wstring decoded = L"";
+		wchar_t temp[] = L"0x00";
+		size_t len = text.length();
+		int sequence = 0;
+		wchar_t conwch = 0;
+		for (size_t i = 0; i < len; i++)
 		{
-			assert(i + 2 < length);
-			unsigned char high = FromHex((unsigned char)str[++i]);
-			unsigned char low = FromHex((unsigned char)str[++i]);
-			strTemp += high * 16 + low;
+			wchar_t wch = text.at(i++);
+			if ((wch == '%') && (i + 1 < len))
+			{
+				temp[2] = text.at(i++);
+				temp[3] = text.at(i);
+				long tconwch = wcstol(temp, NULL, 16);
+				if (tconwch <= 0x7F) {
+					decoded += tconwch; // normal ascii char
+				}
+				else if (tconwch >= 0x80 && tconwch <= 0xBF) { // partial byte
+					tconwch = tconwch & 0x3F;
+					if (sequence-- == 2)
+						tconwch = tconwch << 6;
+					conwch |= tconwch;
+					if (sequence == 0)
+						decoded += conwch;
+				}
+				else if (tconwch >= 0xC0 && tconwch <= 0xDF) {
+					conwch = (tconwch & 0x1F) << 6; // make space for partial bytes
+					sequence = 1; // 1 more partial bytes follow
+				}
+				else if (tconwch >= 0xE0 && tconwch <= 0xEF) {
+					conwch = (tconwch & 0xF) << 12; // make space for partial bytes
+					sequence = 2; // 2 more partial bytes follow
+				} // TODO add case fore 3 partial bytes ... very rare
+			}
+			else {
+				decoded += text.at(--i);
+			}
 		}
-		else strTemp += str[i];
-	}
-	return strTemp;
+		return decoded;
+	
+
 }
 
 void CSDKLoginUIMgr::Notify(TNotifyUI& msg)

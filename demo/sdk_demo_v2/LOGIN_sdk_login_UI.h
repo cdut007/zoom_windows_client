@@ -184,13 +184,14 @@ public:
 	void ChangeUIforJoinFailed();
 
 	void NotifyAuthDone();
-	string parseUri(const string& request, const string& _url);
+	wstring parseUri(const wstring& request, const wstring& _url);
+	wstring parseURL2(wstring str, wstring key);
 	std::wstring s2ws(const std::string& s);
 	std::string ws2s(const std::wstring& ws);
 	unsigned char ToHex(unsigned char x);
 	unsigned char FromHex(unsigned char x);
 	std::string UrlEncode(const std::string& str);
-	std::string UrlDecode(const std::string& str);
+	std::wstring UrlDecode(const std::wstring& str);
 
 protected:
 	CPaintManagerUI m_PaintManager;
