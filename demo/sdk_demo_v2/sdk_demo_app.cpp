@@ -14,11 +14,11 @@ void CSDKDemoApp::Run(HINSTANCE hInstance)
 		return;
 	
 	m_sdk_init_auth_ui->SetEvent(this);
-	m_sdk_init_auth_ui->Create(NULL, _T("金蝉视频会议系统v1.0"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+	m_sdk_init_auth_ui->Create(NULL, _T("金蝉会商系统v1.0"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
 	m_sdk_init_auth_ui->SetIcon(IDI_ICON_LOGO);
 
 	m_sdk_login_ui_mgr->SetEvent(this);
-	m_sdk_login_ui_mgr->Create(NULL, _T("金蝉视频会议系统v1.0"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+	m_sdk_login_ui_mgr->Create(NULL, _T("金蝉会商系统v1.0"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
 	m_sdk_login_ui_mgr->SetIcon(IDI_ICON_LOGO);
 	m_sdk_login_ui_mgr->ShowWindow(false);
 	
@@ -218,7 +218,7 @@ void CSDKDemoApp::onShowLoggedInUI(LoggedIn_MeetingUI_type nType_)
 		return;
 
 	m_sdk_loggedIn_ui_mgr->SetEvent(this);
-	m_sdk_loggedIn_ui_mgr->Create(NULL, _T("金蝉视频会议"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+	m_sdk_loggedIn_ui_mgr->Create(NULL, _T("金蝉会商系统"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
 	m_sdk_loggedIn_ui_mgr->SetIcon(IDI_ICON_LOGO);
 
 	CRect rc(0,0,0,0);
@@ -303,7 +303,7 @@ void CSDKDemoApp::onJoinFailed()
 
 void CSDKDemoApp::onSwitchToScheduleMeetingUI()
 {
-	//m_schedule_meeting_ui_mgr = new CSDKSheduleMeetingUIMgr();
+	
 	if (m_schedule_meeting_ui_mgr)
 	{
 		::DestroyWindow(m_schedule_meeting_ui_mgr->GetHWND());
@@ -316,7 +316,7 @@ void CSDKDemoApp::onSwitchToScheduleMeetingUI()
 	if(NULL == m_schedule_meeting_ui_mgr)
 		return;
 	m_schedule_meeting_ui_mgr->SetEvent(this);
-	m_schedule_meeting_ui_mgr->Create(NULL, _T("金蝉视频会议系统"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+	m_schedule_meeting_ui_mgr->Create(NULL, _T("金蝉会商系统"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
 	m_schedule_meeting_ui_mgr->SetIcon(IDI_ICON_LOGO);
 	m_schedule_meeting_ui_mgr->ShowWindow(true);
 }

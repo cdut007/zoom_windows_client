@@ -455,7 +455,7 @@ void CSDKLoggedInUIMgr::DoConfigureBtnClick()
 {
 	if(m_pAppEvent)
 	{
-		m_pAppEvent->onShowSettingsUI();
+     		m_pAppEvent->onShowSettingsUI();
 	}
 
 }

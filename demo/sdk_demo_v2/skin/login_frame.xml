@@ -105,17 +105,17 @@
 				<Button name="btn_login" text="login" textcolor="#FFFFFFFF" font="6" height="35" width="300"/>
 				<Control />  	  
 	  </VerticalLayout>
-	  <VerticalLayout name="waiting">
+	  <VerticalLayout name="waiting" align="center">
 		<Control />
 		<HorizontalLayout height="32">
 			<Control />
-			<GifAnim name="gif_waiting" autosize="true" bkimage="waiting.gif" gifrestype="ZPIMGRES" autoplay="false" />
+			<GifAnim align="center" name="gif_waiting" autosize="true" bkimage="waiting.gif" gifrestype="ZPIMGRES" autoplay="false" />
 			<Control />
 		</HorizontalLayout>
 		<Control height="5"/>
 		<HorizontalLayout height="20">
 			<Control />
-			<label name="waiting_label" minwidth="172" text="connect......" font="7" />
+			<label align="center" name="waiting_label" minwidth="175" text="connect......" font="7" />
 			<Control />
 		</HorizontalLayout>
 		<Control />

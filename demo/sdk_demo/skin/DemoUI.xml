@@ -32,17 +32,17 @@
 			<Button name="btn_close" float="true" pos="512,11,520,19" width="8" height="8" normalimage=" res='close_btn.png' restype='ZPIMGRES' " hotimage=" res='close_btn.png' restype='ZPIMGRES' " pushedimage=" res='close_btn.png' restype='ZPIMGRES' "/>
 		</HorizontalLayout>
 		-->
-    <Container name="waiting_panel" height="400" >
-      <VerticalLayout >
+    <Container name="waiting_panel" height="400" align="center">
+      <VerticalLayout align="center" >
         <Control height="130"/>
         <HorizontalLayout height="40" >
           <Control />
-          <GifAnim name="gif_waiting" pos="60,60,92,92" autosize="false" bkimage="waiting.gif" gifrestype="ZPIMGRES" autoplay="false" />
+          <GifAnim name="gif_waiting" align="center" autosize="false" bkimage="waiting.gif" gifrestype="ZPIMGRES" autoplay="false" />
           <Control />
         </HorizontalLayout>
         <HorizontalLayout height="40" >
           <Control />
-          <label text="connect......" font="7" width="100" height="30" />
+          <label align="center"  text="connect......" font="7" width="100" height="30" />
           <Control />
         </HorizontalLayout>
         <HorizontalLayout height="40" >

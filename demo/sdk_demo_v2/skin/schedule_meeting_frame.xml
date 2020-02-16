@@ -167,17 +167,17 @@
             </HorizontalLayout>
         </VerticalLayout>
 
-        <VerticalLayout name="waiting_panel" visible="false">
+        <VerticalLayout  align="center" name="waiting_panel" visible="false">
           <Control />
           <HorizontalLayout height="32">
             <Control />
-            <GifAnim name="gif_waiting" autosize="true" bkimage="waiting.gif" gifrestype="ZPIMGRES" autoplay="false" />
+            <GifAnim align="center" name="gif_waiting" autosize="true" bkimage="waiting.gif" gifrestype="ZPIMGRES" autoplay="false" />
             <Control />
           </HorizontalLayout>
           <Control height="5"/>
           <HorizontalLayout height="20">
             <Control />
-            <label name="waiting_label" text="waiting......" font="7" />
+            <label align="center" name="waiting_label" minwidth="175" text="waiting......" font="7" />
             <Control />
           </HorizontalLayout>
           <Control />

@@ -387,6 +387,7 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::onMeetingStatusChanged(ZOOM_SDK_NA
 			{
 				m_parentFrame->GetAppEvent()->onJoinFailed();
 				m_parentFrame->SetCurrentPage(m_WithoutLoginStartJoinMeetingPage);
+				m_parentFrame->GetAppEvent()->onQuitApp();
 			}
 
 		}
@@ -404,7 +405,9 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::onMeetingStatusChanged(ZOOM_SDK_NA
 		{
 			if(m_parentFrame)
 			{
-				m_parentFrame->GetAppEvent()->onShowLoggedInUI(Demo_Meeting_Join_Only);
+				m_parentFrame->SetCurrentPage(m_WithoutLoginStartJoinMeetingPage);
+				m_parentFrame->SwitchToWaitingPage(_T("»áÒéÖÐ..."), true);
+			//	m_parentFrame->GetAppEvent()->onShowLoggedInUI(Demo_Meeting_Join_Only);
 			}
 		}
 	default:
