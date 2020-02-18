@@ -726,6 +726,19 @@ void CSDKLoginUIMgr::InitWindow()
 
 
 }
+
+void CSDKLoginUIMgr::initCheckUriFromOther(wstring & strParam) {
+	wstring id = parseUri(_T("id"), strParam);
+	wstring name = parseUri(_T("name"), strParam);
+	wstring idStr = id;
+	wstring nameStr = UrlDecode(name);
+	//ShowErrorMessage(name.c_str());
+	OutputDebugString(_T("print name\n"));
+	OutputDebugString(nameStr.c_str());
+	OutputDebugString(_T("\n"));
+	m_WithoutLoginStartJoinMeetingUIGroup.setUri(idStr, nameStr);
+	m_WithoutLoginStartJoinMeetingUIGroup.DoWithoutLoginStartJoinMeetingBtnClick();
+}
 void CSDKLoginUIMgr::initCheckUri(){
 	//check uri
 	LPWSTR *szArgList;

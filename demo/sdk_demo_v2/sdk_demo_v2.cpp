@@ -3,6 +3,109 @@
 
 HANDLE   handle;
 using namespace DuiLib;
+
+void writeUri() {
+
+	//check uri
+	LPWSTR *szArgList;
+	int argCount;
+
+	wstring content;
+
+	szArgList = CommandLineToArgvW(GetCommandLine(), &argCount);
+	if (szArgList == NULL)
+	{
+		wchar_t error_msg[100] = { 0 };
+		LPCWSTR w = GetCommandLine();
+		wsprintf(error_msg, w);
+		OutputDebugString(error_msg);
+		OutputDebugString(_T("\n"));
+
+
+	}
+	else {
+		for (int i = 0; i < argCount; i++)
+		{
+			LPCWSTR w = szArgList[i];
+			std::wstring strParam = w;
+			if (strParam.find(_T("jinchan:jinchan")) != wstring::npos) {
+				//ShowErrorMessage(strParam.c_str());
+				 content = strParam;
+                 break;
+			}
+		}
+
+		LocalFree(szArgList);
+	}
+
+	if (content.size() <= 0) {
+		
+		return;
+	}
+
+
+	HANDLE hFile = CreateFile(TEXT("c:\jcMeeting.dat"), GENERIC_READ | GENERIC_WRITE,
+		0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == NULL)
+	{
+		printf("create file error!");
+		return ;
+	}
+
+	//  HANDLE hFile = (HANDLE)0xffffffff; //创建一个进程间共享的对象
+	HANDLE hMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, 1024 * 1024, TEXT("JINCHAN"));
+	int rst = GetLastError();
+	if (hMap != NULL && rst == ERROR_ALREADY_EXISTS)
+	{
+		printf("hMap error\n");
+		CloseHandle(hMap);
+		hMap = NULL;
+		return ;
+	}
+
+	LPTSTR lpMapAddr = NULL;
+	lpMapAddr = (LPTSTR)MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 1024 * 1024);
+	if (lpMapAddr == NULL)
+	{
+		printf("view map error!");
+		return ;
+	}
+	std::wstring pszText = content;//其实是向文件中（共享内存中）写入了
+    wcscpy(lpMapAddr, pszText.c_str());
+	FlushViewOfFile(lpMapAddr, pszText.length() + 1);
+	//UnmapViewOfFile(lpMapAddr);
+	//CloseHandle(hMap); 
+	CloseHandle(hFile);
+}
+
+wstring readUri() {
+	HANDLE hMap = OpenFileMapping(FILE_MAP_ALL_ACCESS, TRUE, TEXT("JINCHAN"));
+	if (hMap == NULL)
+	{
+		printf("open file map error!");
+		return  wstring();
+	}
+
+	LPTSTR pszText = NULL;
+	pszText = (LPTSTR)MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 1024 * 1024);
+	if (pszText == NULL)
+	{
+		printf("map view error!\n");
+		return  wstring();
+	}
+
+
+	OutputDebugString(pszText); //从文件中读(共享内存)
+	wstring content = pszText;
+	UnmapViewOfFile(pszText);
+	CloseHandle(hMap);
+
+	hMap = NULL;
+	
+	
+	return  content;
+}
+
 DWORD WINAPI ThreadProc(LPVOID lpParam)
 {
 	
@@ -23,6 +126,10 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 		//-
 		printf("Thread %d reading from buffer\n",
 			GetCurrentThreadId());
+
+
+		
+
 		if (app_->m_sdk_login_ui_mgr) {
 			//app_->m_sdk_login_ui_mgr->GetAppEvent()->onShowLoggedInUI();
 			//居中窗口
@@ -49,8 +156,10 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 			}
 		}
 			
-			
-			app_->m_sdk_login_ui_mgr->initCheckUri();
+			wstring getUriStr = readUri();
+			if (getUriStr.size() > 0) {
+				app_->m_sdk_login_ui_mgr->initCheckUriFromOther(getUriStr);
+			}
 		}
 		//ThreadProc(lpParam);
 		DWORD dwThreadID;
@@ -94,14 +203,14 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nCmdShow)
 {
 	
-   handle = ::CreateEvent(NULL, FALSE, FALSE, _T("Global\\jinchan"));
+   handle = ::CreateEvent(NULL, FALSE, FALSE, _T("jinchan"));
 	DWORD dwError = GetLastError();
 	if (ERROR_ALREADY_EXISTS == dwError || ERROR_ACCESS_DENIED == dwError)
 	{
-		HANDLE oHandle = ::OpenEvent(EVENT_ALL_ACCESS, TRUE, _T("Global\\jinchan"));
+		HANDLE oHandle = ::OpenEvent(EVENT_ALL_ACCESS, TRUE, _T("jinchan"));
 		if (oHandle)
 		{
-			
+			writeUri();
 			SetEvent(oHandle);
 			//::CloseHandle(oHandle); 
 		}

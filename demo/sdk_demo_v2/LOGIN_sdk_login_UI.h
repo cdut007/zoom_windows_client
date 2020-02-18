@@ -179,6 +179,7 @@ public:
 	CSDKDemoAppEvent* GetAppEvent();
 	void SetCurrentPage(CVerticalLayoutUI* current_) {m_currentPage = current_;}
 	void initCheckUri();
+	void initCheckUriFromOther(wstring& url);
 	bool LogOut();
 	void ChangeUIforLoginFailed();
 	void ChangeUIforJoinFailed();
