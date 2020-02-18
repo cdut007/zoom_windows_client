@@ -440,8 +440,8 @@ void CAuthSDKUIGroup::DoAuthBtnClick()
 {
 	if(NULL == m_editSDKKey || NULL == m_editSDKSecret)
 		return;
-	std::wstring strKey = _T("afFG4PCSpjKMory9SVgpgK1AMcPuPg6PgBp6");// m_editSDKKey->GetText().GetData();
-	std::wstring strSecret = _T("Q75RPg8nl8kqalD7V2T7kJXNWrCL5UdvuPEJ");// m_editSDKSecret->GetText().GetData();
+	std::wstring strKey = _T("v9GTGRBNiRqdNFB5yri8oCyEcmrshS1FnBWC");// m_editSDKKey->GetText().GetData();
+	std::wstring strSecret = _T("xVMM7l6BdICDZrVlrOYsUKVNSZ1mxpM5jUez");// m_editSDKSecret->GetText().GetData();
 
 	if (strKey.size() > 0 && strSecret.size() > 0)
 	{

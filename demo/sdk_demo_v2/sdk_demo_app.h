@@ -37,7 +37,7 @@ public:
 	virtual void onShowCameraControlWindow();
 
 
-private:
+public:
 	CSDKInitAuthUIMgr* m_sdk_init_auth_ui;
 	CSDKLoginUIMgr* m_sdk_login_ui_mgr;
 	CSDKLoggedInUIMgr* m_sdk_loggedIn_ui_mgr;
