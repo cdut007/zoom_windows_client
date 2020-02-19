@@ -154,12 +154,19 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 					(ScreenY - (rc.bottom - rc.top)) / 2, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER | SWP_SHOWWINDOW);
 				ActiveWindowToTop(m_hWnd);
 			}
+
+		
 		}
 			
 			wstring getUriStr = readUri();
 			if (getUriStr.size() > 0) {
 				app_->m_sdk_login_ui_mgr->initCheckUriFromOther(getUriStr);
 			}
+
+			//AttachThreadInput(GetWindowThreadProcessId(::GetForegroundWindow(), NULL), GetCurrentThreadId(), TRUE);
+			//SetForegroundWindow(m_hWnd);
+			//SetFocus(m_hWnd);
+			//AttachThreadInput(GetWindowThreadProcessId(::GetForegroundWindow(), NULL), GetCurrentThreadId(), FALSE);
 		}
 		//ThreadProc(lpParam);
 		DWORD dwThreadID;
