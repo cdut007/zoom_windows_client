@@ -406,7 +406,7 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::onMeetingStatusChanged(ZOOM_SDK_NA
 			if(m_parentFrame)
 			{
 				m_parentFrame->SetCurrentPage(m_WithoutLoginStartJoinMeetingPage);
-				m_parentFrame->SwitchToWaitingPage(_T("»áÒéÖÐ..."), true);
+				ShowWindow(m_parentFrame->GetHWND(), 0);
 			//	m_parentFrame->GetAppEvent()->onShowLoggedInUI(Demo_Meeting_Join_Only);
 			}
 		}
