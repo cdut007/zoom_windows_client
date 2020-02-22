@@ -223,6 +223,10 @@ void CSDKLoginWithSSOUIGroup::DoLoginWithSSOBtnClick()
 /////class CSDKWithoutLoginStartJoinMeetingUIGroup
 CSDKWithoutLoginStartJoinMeetingUIGroup::CSDKWithoutLoginStartJoinMeetingUIGroup()
 {
+	if (m_parentFrame)
+	{
+		m_parentFrame->setInMeetingNow(false);
+	}
 	m_WithoutLoginStartJoinMeetingPage = NULL;
 	m_editMeetingNumber = NULL;
 	m_editScreenName = NULL;
@@ -407,6 +411,7 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::onMeetingStatusChanged(ZOOM_SDK_NA
 			{
 				m_parentFrame->SetCurrentPage(m_WithoutLoginStartJoinMeetingPage);
 				ShowWindow(m_parentFrame->GetHWND(), 0);
+				m_parentFrame->setInMeetingNow(true);
 			//	m_parentFrame->GetAppEvent()->onShowLoggedInUI(Demo_Meeting_Join_Only);
 			}
 		}
@@ -812,6 +817,22 @@ std::string CSDKLoginUIMgr::ws2s(const std::wstring& wstr)
 		return "";
 	}
 	return str;
+}
+
+std::string CSDKLoginUIMgr::getMeetingId() {
+	if (NULL == m_WithoutLoginStartJoinMeetingUIGroup.m_editMeetingNumber) {
+		return string();
+	}
+	std::wstring MeetingNumber = m_WithoutLoginStartJoinMeetingUIGroup.m_editMeetingNumber->GetText().GetData();
+	return ws2s(MeetingNumber);
+}
+
+bool CSDKLoginUIMgr::isInMeetingNow() {
+	return inMeetingFlag;
+}
+
+void CSDKLoginUIMgr::setInMeetingNow(bool isInMeetingFlag) {
+	this->inMeetingFlag = isInMeetingFlag;
 }
 
 std::wstring CSDKLoginUIMgr::s2ws(const std::string& str)

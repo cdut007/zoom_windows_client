@@ -1,6 +1,7 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "sdk_demo_app.h"
 #include "zoomHmacSHA256.h"
+#include <regex>
 #pragma comment(lib,"ws2_32.lib")
 
 #define ops_bswap_64(val) (((val) >> 56) |\
@@ -156,7 +157,7 @@ public:
 				return false;
 			}
 			std::vector<std::string> strLines;
-			strSplit(strRecvData, strLines, "\\r\n");
+			strSplit(strRecvData, strLines, "\r\n");
 			for (size_t i = 0; i < strLines.size(); ++i)
 			{
 				OutputDebugString(_T("strSplit.find...\n"));
@@ -164,7 +165,7 @@ public:
 				const std::string& line = strLines[i];
 				OutputDebugString(s2ws(line).c_str());
 				std::vector<std::string> strParams;
-				strSplit(line, strParams, ": ");
+				strSplit(line, strParams, ":");
 				if (strParams.size() == 2)
 				{
 					dictParams[strParams[0]] = strParams[1];
@@ -379,12 +380,12 @@ public:
 	}
 
 
-	vector<int> X;//8*64=512£¬Ã¿¸öÏÂ±ê´æ·Å8Î»
-	int W[80];//32Î»ÎªÒ»×é
+	vector<int> X;//8*64=512ï¼Œæ¯ä¸ªä¸‹æ ‡å­˜æ”¾8ä½
+	int W[80];//32ä½ä¸ºä¸€ç»„
 	int A, B, C, D, E;
-	int A1, B1, C1, D1, E1;//»º³åÇø¼Ä´æÆ÷,²úÉú×îºó½á¹û
-	int Turn;//¼ÓÃÜ·Ö×éÊıÁ¿
-	void printX() {//Êä³öÌî³äºóµÄÎÄ±¾
+	int A1, B1, C1, D1, E1;//ç¼“å†²åŒºå¯„å­˜å™¨,äº§ç”Ÿæœ€åç»“æœ
+	int Turn;//åŠ å¯†åˆ†ç»„æ•°é‡
+	void printX() {//è¾“å‡ºå¡«å……åçš„æ–‡æœ¬
 		for (int i = 0; i < X.size(); i++) {
 			printf("%02x", X[i]);
 			if ((i + 1) % 4 == 0)
@@ -393,10 +394,10 @@ public:
 				printf("\n");
 		}
 	}
-	int S(unsigned int x, int n) {//Ñ­»·×óÒÆ
+	int S(unsigned int x, int n) {//å¾ªç¯å·¦ç§»
 		return x >> (32 - n) | (x << n);
 	}
-	void append(string m) {//ÎÄ±¾µÄÌî³ä´¦Àí
+	void append(string m) {//æ–‡æœ¬çš„å¡«å……å¤„ç†
 		Turn = (m.size() + 8) / 64 + 1;
 		X.resize(Turn * 64);
 		int i = 0;
@@ -414,7 +415,7 @@ public:
 			a /= 256;
 		}
 	}
-	void setW(vector<int> m, int n) {//WÊı×éµÄÉú³É
+	void setW(vector<int> m, int n) {//Wæ•°ç»„çš„ç”Ÿæˆ
 		n *= 64;
 		for (int i = 0; i < 16; i++) {
 			W[i] = (m[n + 4 * i] << 24) + (m[n + 4 * i + 1] << 16)
@@ -424,7 +425,7 @@ public:
 			W[i] = S(W[i - 16] ^ W[i - 14] ^ W[i - 8] ^ W[i - 3], 1);
 		}
 	}
-	int ft(int t) {//ft(B,C,D)º¯Êı
+	int ft(int t) {//ft(B,C,D)å‡½æ•°
 		if (t < 20)
 			return (B & C) | ((~B) & D);
 		else if (t < 40)
@@ -434,7 +435,7 @@ public:
 		else
 			return B ^ C ^ D;
 	}
-	int Kt(int t) {//³£Á¿K
+	int Kt(int t) {//å¸¸é‡K
 		if (t < 20)
 			return 0x5a827999;
 		else if (t < 40)
@@ -472,6 +473,26 @@ public:
 		sprintf(info,"%08x%08x%08x%08x%08x", A1, B1, C1, D1, E1);
 
 		return info;
+	}
+
+	string parseUri(const string& request, const string& _url) {
+		smatch result;
+		if (regex_search(_url.cbegin(), _url.cend(), result, regex(request + "=(.*?)&"))) {
+			// åŒ¹é…å…·æœ‰å¤šä¸ªå‚æ•°çš„url
+
+			// *? é‡å¤ä»»æ„æ¬¡ï¼Œä½†å°½å¯èƒ½å°‘é‡å¤  
+			return result[1];
+		}
+		else if (regex_search(_url.cbegin(), _url.cend(), result, regex(request +"=(.*)"))) {
+			// åŒ¹é…åªæœ‰ä¸€ä¸ªå‚æ•°çš„url
+
+			return result[1];
+		}
+		else {
+			// ä¸å«å‚æ•°æˆ–åˆ¶å®šå‚æ•°ä¸å­˜åœ¨
+
+			return string();
+		}
 	}
 
 	std::string base64Encode(const char * input, int length, bool with_new_line)
@@ -520,9 +541,9 @@ private:
 	bool  bIsClose;
 	std::string cacheRecvData;
 	std::map<std::string, std::string> dictParams;
-	std::vector<std::string> listSendPkg;//!ĞèÒª·¢ËÍµÄÊı¾İ
-	std::vector<std::string> listRecvPkg;//!ÒÑ¾­½ÓÊÕµÄ
-	std::string dataFragmentation;//!»º´æ·ÖÆ¬Êı¾İ
+	std::vector<std::string> listSendPkg;//!éœ€è¦å‘é€çš„æ•°æ®
+	std::vector<std::string> listRecvPkg;//!å·²ç»æ¥æ”¶çš„
+	std::string dataFragmentation;//!ç¼“å­˜åˆ†ç‰‡æ•°æ®
 };
 
 
@@ -574,7 +595,7 @@ void writeUri() {
 		return ;
 	}
 
-	//  HANDLE hFile = (HANDLE)0xffffffff; //´´½¨Ò»¸ö½ø³Ì¼ä¹²ÏíµÄ¶ÔÏó
+	//  HANDLE hFile = (HANDLE)0xffffffff; //åˆ›å»ºä¸€ä¸ªè¿›ç¨‹é—´å…±äº«çš„å¯¹è±¡
 	HANDLE hMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, 1024 * 1024, TEXT("JINCHAN"));
 	int rst = GetLastError();
 	if (hMap != NULL && rst == ERROR_ALREADY_EXISTS)
@@ -592,7 +613,7 @@ void writeUri() {
 		printf("view map error!");
 		return ;
 	}
-	std::wstring pszText = content;//ÆäÊµÊÇÏòÎÄ¼şÖĞ£¨¹²ÏíÄÚ´æÖĞ£©Ğ´ÈëÁË
+	std::wstring pszText = content;//å…¶å®æ˜¯å‘æ–‡ä»¶ä¸­ï¼ˆå…±äº«å†…å­˜ä¸­ï¼‰å†™å…¥äº†
     wcscpy(lpMapAddr, pszText.c_str());
 	FlushViewOfFile(lpMapAddr, pszText.length() + 1);
 	//UnmapViewOfFile(lpMapAddr);
@@ -617,7 +638,7 @@ wstring readUri() {
 	}
 
 
-	OutputDebugString(pszText); //´ÓÎÄ¼şÖĞ¶Á(¹²ÏíÄÚ´æ)
+	OutputDebugString(pszText); //ä»æ–‡ä»¶ä¸­è¯»(å…±äº«å†…å­˜)
 	wstring content = pszText;
 	UnmapViewOfFile(pszText);
 	CloseHandle(hMap);
@@ -654,13 +675,13 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 
 		if (app_->m_sdk_login_ui_mgr) {
 			//app_->m_sdk_login_ui_mgr->GetAppEvent()->onShowLoggedInUI();
-			//¾ÓÖĞ´°¿Ú
+			//å±…ä¸­çª—å£
 			HWND m_hWnd(NULL);
 			m_hWnd = app_->m_sdk_login_ui_mgr->GetHWND();
 			app_->m_sdk_login_ui_mgr->SwitchToWaitingPage(L"", false);
 			app_->m_sdk_login_ui_mgr->ShowWindow(true);
 
-			//¾ÓÖĞ´°¿Ú
+			//å±…ä¸­çª—å£
 			RECT rc = { 0 };
 			if (::GetClientRect(m_hWnd, &rc)){
 			rc.right = rc.left + 524;
@@ -703,13 +724,13 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 
 		break;
 	case WAIT_TIMEOUT:
-		printf("³¬Ê±Ã»ÓĞÊÕµ½-------");
-		MessageBox(NULL, _T("³¬Ê±Ã»ÓĞÊÕµ½"), _T("ERROR"), SW_NORMAL);
+		printf("è¶…æ—¶æ²¡æœ‰æ”¶åˆ°-------");
+		MessageBox(NULL, _T("è¶…æ—¶æ²¡æœ‰æ”¶åˆ°"), _T("ERROR"), SW_NORMAL);
 		break;
 		// An error occurred
 	case WAIT_ABANDONED:
-		printf("ÁíÍâÒ»¸ö½ø³ÌÒâÍâÖÕÖ¹-------");
-		MessageBox(NULL, _T("ÁíÍâÒ»¸ö½ø³ÌÒâÍâÖÕÖ¹"), _T("ERROR"), SW_NORMAL);
+		printf("å¦å¤–ä¸€ä¸ªè¿›ç¨‹æ„å¤–ç»ˆæ­¢-------");
+		MessageBox(NULL, _T("å¦å¤–ä¸€ä¸ªè¿›ç¨‹æ„å¤–ç»ˆæ­¢"), _T("ERROR"), SW_NORMAL);
 		break;
 	default:
 		printf("Wait error (%d)\n", GetLastError());
@@ -729,7 +750,18 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 	return 1;
 }
 
-
+std::string ws2s(const std::wstring& wstr)
+{
+	std::string str;
+	int nLen = (int)wstr.length();
+	str.resize(nLen, ' ');
+	int nResult = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)wstr.c_str(), nLen, (LPSTR)str.c_str(), nLen, NULL, NULL);
+	if (nResult == 0)
+	{
+		return "";
+	}
+	return str;
+}
 
 std::wstring s2ws(const std::string& str)
 {
@@ -749,37 +781,119 @@ std::wstring s2ws(const std::string& str)
 }
 
 DWORD WINAPI createSokectListener(LPVOID lpParam) {
+
+
+	CSDKDemoApp  *app_ = (CSDKDemoApp*)lpParam;
+
 	WSADATA wsaData;
 	SOCKET sockServer;
 	SOCKADDR_IN addrServer;
 	SOCKET sockClient;
 	SOCKADDR_IN addrClient;
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
-	sockServer = socket(AF_INET, SOCK_STREAM, 0);
-	addrServer.sin_addr.S_un.S_addr = htonl(INADDR_ANY);//INADDR_ANY±íÊ¾ÈÎºÎIP
+	// åˆå§‹åŒ–socket
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData)!= 0)
+	{
+		OutputDebugString(_T("å®¢æˆ·ç«¯WSAStartupå¤±è´¥"));
+		DWORD dwSokectServerThreadID;
+
+		HANDLE ghSocketServerThread = CreateThread(
+			NULL,              // default security
+			0,                 // default stack size
+			createSokectListener,        // name of the thread function
+			app_,              // no thread parameters
+			0,                 // default startup flags
+			&dwSokectServerThreadID);
+			return -1001;
+	}
+	
+	sockServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (INVALID_SOCKET == sockServer)
+	{
+		OutputDebugString(_T("æœåŠ¡ç«¯socketå¤±è´¥"));
+		WSACleanup();
+		DWORD dwSokectServerThreadID;
+
+		HANDLE ghSocketServerThread = CreateThread(
+			NULL,              // default security
+			0,                 // default stack size
+			createSokectListener,        // name of the thread function
+			app_,              // no thread parameters
+			0,                 // default startup flags
+			&dwSokectServerThreadID);
+		return -1002;
+	}
+
+	int nNetTimeout = 3000;//10ç§’ï¼Œ
+	//è®¾ç½®å‘é€è¶…æ—¶
+	setsockopt(sockServer, SOL_SOCKET, SO_SNDTIMEO, (char *)&nNetTimeout, sizeof(int));
+	//è®¾ç½®æ¥æ”¶è¶…æ—¶
+	setsockopt(sockServer, SOL_SOCKET, SO_RCVTIMEO, (char *)&nNetTimeout, sizeof(int));
+	
+	setsockopt(sockServer, SOL_SOCKET, SO_CONNECT_TIME, (char *)&nNetTimeout, sizeof(int));
+	// è®¾ç½®åœ°å€å’Œç«¯å£å·å¯ä»¥é‡å¤ä½¿ç”¨
+	int optval = 1;
+	int optlen = sizeof(optval);
+	setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char *)&optval, optlen);
+
+	addrServer.sin_addr.S_un.S_addr = htonl(INADDR_ANY);//INADDR_ANYè¡¨ç¤ºä»»ä½•IP
 	addrServer.sin_family = AF_INET;
-	addrServer.sin_port = htons(9527);//°ó¶¨¶Ë¿Ú9527
-	bind(sockServer, (SOCKADDR*)&addrServer, sizeof(SOCKADDR));
+	addrServer.sin_port = htons(9527);//ç»‘å®šç«¯å£9527
+	int retval = ::bind(sockServer, (SOCKADDR*)&addrServer, sizeof(addrServer));
+	if (SOCKET_ERROR == retval)
+	{
+		OutputDebugString(_T("æœåŠ¡ç«¯bindå¤±è´¥"));
+		closesocket(sockServer);
+		WSACleanup();
+		DWORD dwSokectServerThreadID;
 
-	//Listen¼àÌı¶Ë
-	listen(sockServer, 1);//1ÎªµÈ´ıÁ¬½ÓÊıÄ¿
-	OutputDebugString(_T("\n"));
-	OutputDebugString(_T("·şÎñÆ÷ÒÑÆô¶¯:\n¼àÌıÖĞ..."));
-	OutputDebugString(_T("\n"));
-	int len = sizeof(SOCKADDR);
-	int const CLIENT_MSG_SIZE = 4096;//½ÓÊÕ»º³åÇø³¤¶È
+		HANDLE ghSocketServerThread = CreateThread(
+			NULL,              // default security
+			0,                 // default stack size
+			createSokectListener,        // name of the thread function
+			app_,              // no thread parameters
+			0,                 // default startup flags
+			&dwSokectServerThreadID);
+		return -1003;
+	}
+
+	//Listenç›‘å¬ç«¯
+	retval = listen(sockServer, 1);//5ä¸ºç­‰å¾…è¿æ¥æ•°ç›®
+	if (SOCKET_ERROR == retval)
+	{
+		OutputDebugString(_T("æœåŠ¡ç«¯listenå¤±è´¥"));
+		closesocket(sockServer);
+		WSACleanup();
+		DWORD dwSokectServerThreadID;
+
+		HANDLE ghSocketServerThread = CreateThread(
+			NULL,              // default security
+			0,                 // default stack size
+			createSokectListener,        // name of the thread function
+			app_,              // no thread parameters
+			0,                 // default startup flags
+			&dwSokectServerThreadID);
+		return -1004;
+	}
+	
+	int len = sizeof(addrClient);
+	int const CLIENT_MSG_SIZE = 4096;//æ¥æ”¶ç¼“å†²åŒºé•¿åº¦
 
 
-	char sendBuf[CLIENT_MSG_SIZE];//·¢ËÍÖÁ¿Í»§¶ËµÄ×Ö·û´®
-	char recvBuf[CLIENT_MSG_SIZE];//½ÓÊÜ¿Í»§¶Ë·µ»ØµÄ×Ö·û´®
-
-					 //»á×èÈû½ø³Ì£¬Ö±µ½ÓĞ¿Í»§¶ËÁ¬½ÓÉÏÀ´ÎªÖ¹
-	sockClient = accept(sockServer, (SOCKADDR*)&addrClient, &len);
+	char sendBuf[CLIENT_MSG_SIZE];//å‘é€è‡³å®¢æˆ·ç«¯çš„å­—ç¬¦ä¸²
+	char recvBuf[CLIENT_MSG_SIZE];//æ¥å—å®¢æˆ·ç«¯è¿”å›çš„å­—ç¬¦ä¸²
 	
 
-	if (sockClient == INVALID_SOCKET) {//Á¬½ÓÊ§°Ü
-		OutputDebugString(_T("¿Í»§¶ËacceptÊ§°Ü"));
-		closesocket(sockClient);
+	OutputDebugString(_T("\n"));
+	OutputDebugString(_T("æœåŠ¡å™¨å·²å¯åŠ¨:ç›‘å¬ä¸­..."));
+	OutputDebugString(_T("\n"));
+
+	//ä¼šé˜»å¡è¿›ç¨‹ï¼Œç›´åˆ°æœ‰å®¢æˆ·ç«¯è¿æ¥ä¸Šæ¥ä¸ºæ­¢
+	sockClient = accept(sockServer, (SOCKADDR*)&addrClient, &len);
+	OutputDebugString(_T("å®¢æˆ·ç«¯accept ready ok\n"));
+
+	if (sockClient == INVALID_SOCKET) {//è¿æ¥å¤±è´¥
+		OutputDebugString(_T("å®¢æˆ·ç«¯acceptå¤±è´¥\n"));
+		closesocket(sockServer);
 		WSACleanup();
 		CSDKDemoApp  *app_ = (CSDKDemoApp*)lpParam;
 		DWORD dwSokectServerThreadID;
@@ -788,24 +902,31 @@ DWORD WINAPI createSokectListener(LPVOID lpParam) {
 			NULL,              // default security
 			0,                 // default stack size
 			createSokectListener,        // name of the thread function
-			&app_,              // no thread parameters
+			app_,              // no thread parameters
 			0,                 // default startup flags
 			&dwSokectServerThreadID);
+		
+		sprintf(recvBuf,"GetLastError failed:%d\n", GetLastError());
+		OutputDebugString(s2ws(string(recvBuf)).c_str());
+		sprintf(sendBuf, "WSAStartup failed:%d\n", WSAGetLastError());
+		OutputDebugString(s2ws(string(sendBuf)).c_str());
+		
 
-		return -5;
+		return -7;
 	}
 
-	//Ò»Ö±²»¶ÏµØ½ÓÊÕÏûÏ¢£¬Ö±µ½¿Í»§¶ËÑ¡ÔñÍË³ö
+	//ä¸€ç›´ä¸æ–­åœ°æ¥æ”¶æ¶ˆæ¯ï¼Œç›´åˆ°å®¢æˆ·ç«¯é€‰æ‹©é€€å‡º
 	while (true) {
-		memset(recvBuf, 0, CLIENT_MSG_SIZE);//½ÓÊÕÏûÏ¢Ö®Ç°Çå¿Õ½ÓÊÕÏûÏ¢Êı×é
-										  //½ÓÊÕ²¢´òÓ¡¿Í»§¶ËÊı¾İ
-		OutputDebugString(_T("¿Í»§¶ËµÈ´ı½ÓÊÕ\n"));
+		memset(recvBuf, 0, CLIENT_MSG_SIZE);
+		OutputDebugString(_T("å®¢æˆ·ç«¯ç­‰å¾…æ¥æ”¶\n"));
 		int recvCode = recv(sockClient, recvBuf, CLIENT_MSG_SIZE, 0);
 		
 
 
-		if (recvCode == SOCKET_ERROR) {//Èç¹û½ÓÊÕÏûÏ¢³ö´í
-			OutputDebugString(_T("¿Í»§¶ËÖĞ¶Ï»á»°Òì³££¬ Ê§°Ü"));
+		if (recvCode == SOCKET_ERROR) {//å¦‚æœæ¥æ”¶æ¶ˆæ¯å‡ºé”™
+			OutputDebugString(_T("å®¢æˆ·ç«¯ä¸­æ–­ä¼šè¯å¼‚å¸¸ï¼Œ å¤±è´¥\n"));
+			//continue;
+			closesocket(sockServer);
 			closesocket(sockClient);
 			WSACleanup();
 			CSDKDemoApp  *app_ = (CSDKDemoApp*)lpParam;
@@ -815,26 +936,116 @@ DWORD WINAPI createSokectListener(LPVOID lpParam) {
 				NULL,              // default security
 				0,                 // default stack size
 				createSokectListener,        // name of the thread function
-				&app_,              // no thread parameters
+				app_,              // no thread parameters
 				0,                 // default startup flags
 				&dwSokectServerThreadID);
-			return -4;
+
+			sprintf(recvBuf, "GetLastError failed:%d\n", GetLastError());
+			OutputDebugString(s2ws(string(recvBuf)).c_str());
+			sprintf(sendBuf, "WSAStartup failed:%d\n", WSAGetLastError());
+			OutputDebugString(s2ws(string(sendBuf)).c_str());
+
+
+			return -99;
 		}
 
-		//·ñÔò£¬Êä³öÏûÏ¢
-		OutputDebugString(_T("·şÎñÆ÷ÒÑÆô¶¯:\n½ÓÊÕÊı¾İ..."));
-		OutputDebugString(s2ws(recvBuf).c_str());
-		OutputDebugString(_T("\n"));
+		//å¦åˆ™ï¼Œè¾“å‡ºæ¶ˆæ¯
+		OutputDebugString(_T("æœåŠ¡å™¨å·²å¯åŠ¨:\næ¥æ”¶æ•°æ®..."));
+		//OutputDebugString(s2ws(recvBuf).c_str());
 		
+		OutputDebugString(_T("\n"));
+		if (true) {//æ¨¡æ‹Ÿhttp è¯·æ±‚
+			//char* s_header;
+			strcpy(sendBuf, "HTTP/1.1 200 Ok\r\nConnection: close\r\n");//å¿…é¡»ä»¥HTTPåè®®ç‰ˆæœ¬å’ŒçŠ¶æ€ç å¼€å¤´ï¼Œå…¶ä»–çš„fieldé¡ºåºä¸é‡è¦
+			strcat(sendBuf, "Content-Type:application/json; charset=utf-8\r\n");//æˆ‘æ‰“ç®—å‘ä¸ªhtmlæ–‡ä»¶ç»™å®¢æˆ·ç«¯ï¼Œæ‰€ä»¥Content-Type:text/html
+			strcat(sendBuf, "\r\n");
+
+			WSProtocol  m_oWSProtocol = WSProtocol();
+			std::vector<std::string> strLines;
+			m_oWSProtocol.strSplit(recvBuf, strLines, "\r\n");
+			for (size_t i = 0; i < strLines.size(); ++i)
+			{
+
+				const std::string& line = strLines[i];
+				
+				std::vector<std::string> strParams;
+				m_oWSProtocol.strSplit(line, strParams, ":");
+				if (strParams.size() == 2)
+				{
+					OutputDebugString(_T("\n"));
+					OutputDebugString(_T("key:"));
+					OutputDebugString(s2ws(strParams[0]).c_str());
+					OutputDebugString(_T("\r"));
+					OutputDebugString(_T("value:"));
+					OutputDebugString(s2ws(strParams[1]).c_str());
+				}
+				else if (strParams.size() == 1 && strParams[0].find("GET") != std::string::npos)
+				{
+					OutputDebugString(_T("\n"));
+					string queryParams = strParams[0];
+					
+					if (queryParams.find("getCurrentMeetingInfo") != std::string::npos)
+					{
+						//parse params;
+						string id = m_oWSProtocol.parseUri("id", queryParams);
+						
+						if (app_->m_sdk_login_ui_mgr) {
+							std::string MeetingNumber = app_->m_sdk_login_ui_mgr->getMeetingId();
+							
+								if (MeetingNumber != id) {
+									string result = "{\"statusCode\":200,\"data\":{\"id\":\"" + MeetingNumber + "\"}}";
+									strcat(sendBuf, result.c_str());//s_bufferæ˜¯htmlæ–‡ä»¶è¯»å–åæ‰€åœ¨çš„buffer
+									HWND m_hWnd(NULL);
+									m_hWnd = app_->m_sdk_login_ui_mgr->GetHWND();
+									AttachThreadInput(GetWindowThreadProcessId(::GetForegroundWindow(), NULL), GetCurrentThreadId(), TRUE);
+									SetForegroundWindow(m_hWnd);
+									SetFocus(m_hWnd);
+									AttachThreadInput(GetWindowThreadProcessId(::GetForegroundWindow(), NULL), GetCurrentThreadId(), FALSE);
+									OutputDebugString(_T("\nã€æ‰“å°idã€‘:"));
+									OutputDebugString(s2ws(id).c_str());
+									OutputDebugString(_T("\n"));
+								}
+
+								
+							
+							
+						}
+						
+					}
+					OutputDebugString(s2ws(queryParams).c_str());
+				}
+			}
+
+			
+			string sendStr = sendBuf;
+			send(sockClient, sendStr.c_str(), sendStr.length(), MSG_DONTROUTE);
+			OutputDebugString(_T("æœåŠ¡å™¨å·²å¯åŠ¨:\nå›å¤æ•°æ®..."));
+			OutputDebugString(s2ws(sendBuf).c_str());
+			memset(sendBuf, 0, CLIENT_MSG_SIZE);//æ¯æ¬¡å›å¤ä¹‹åï¼Œæ¸…ç©ºå‘é€æ¶ˆæ¯æ•°ç»„
+			
+			closesocket(sockServer);
+			closesocket(sockClient);
+			WSACleanup();
+			DWORD dwSokectServerThreadID;
+
+			HANDLE ghSocketServerThread = CreateThread(
+				NULL,              // default security
+				0,                 // default stack size
+				createSokectListener,        // name of the thread function
+				app_,              // no thread parameters
+				0,                 // default startup flags
+				&dwSokectServerThreadID);
+			return 0;
+		}
 		WSProtocol  m_oWSProtocol = WSProtocol();
 		if (m_oWSProtocol.handleRecv(recvBuf, len))
 		{
-			OutputDebugString(_T("×¼±¸»Ø¸´Êı¾İ...\n"));
+			OutputDebugString(_T("å‡†å¤‡å›å¤æ•°æ®...\n"));
 			const vector<string>& waitToSend = m_oWSProtocol.getSendPkg();
 			for (size_t i = 0; i < waitToSend.size(); ++i)
 			{
 				
-				OutputDebugString(_T("·şÎñÆ÷ÒÑÆô¶¯:\n»Ø¸´Êı¾İ..."));
+				OutputDebugString(_T("æœåŠ¡å™¨å·²å¯åŠ¨:\nå›å¤æ•°æ®..."));
 				OutputDebugString(s2ws(waitToSend[i]).c_str());
 				OutputDebugString(_T("\n"));
 
@@ -842,11 +1053,11 @@ DWORD WINAPI createSokectListener(LPVOID lpParam) {
 				send(sockClient, sendBuf, CLIENT_MSG_SIZE, 0);
 
 
-				memset(sendBuf, 0, CLIENT_MSG_SIZE);//Ã¿´Î»Ø¸´Ö®ºó£¬Çå¿Õ·¢ËÍÏûÏ¢Êı×é
+				memset(sendBuf, 0, CLIENT_MSG_SIZE);//æ¯æ¬¡å›å¤ä¹‹åï¼Œæ¸…ç©ºå‘é€æ¶ˆæ¯æ•°ç»„
 
 
 			}
-			OutputDebugString(_T("×¼±¸»Ø¸´Êı¾İEnd...\n"));
+			OutputDebugString(_T("å‡†å¤‡å›å¤æ•°æ®End...\n"));
 
 			m_oWSProtocol.clearSendPkg();
 
@@ -855,16 +1066,17 @@ DWORD WINAPI createSokectListener(LPVOID lpParam) {
 			{
 				const string& eachRecvPkg = recvPkg[i];
 				uint16_t nCmd = 0;
-				OutputDebugString(_T("½ÓÊÕÊı¾İ..\n"));
+				OutputDebugString(_T("æ¥æ”¶æ•°æ®..\n"));
 				OutputDebugString(s2ws(eachRecvPkg).c_str());
 
 			}
 			m_oWSProtocol.clearRecvPkg();
 			if (m_oWSProtocol.isClose())
 			{
-				OutputDebugString(_T("×¼±¸¹Ø±ÕÊı¾İ..."));
-				//¹Ø±Õsocket
+				OutputDebugString(_T("å‡†å¤‡å…³é—­æ•°æ®..."));
+				//å…³é—­socket
 				closesocket(sockClient);
+				closesocket(sockServer);
 				WSACleanup();
 				return 1;
 			}
@@ -876,11 +1088,39 @@ DWORD WINAPI createSokectListener(LPVOID lpParam) {
 		
 	}
 
-	//¹Ø±Õsocket
+	//å…³é—­socket
+	closesocket(sockServer);
 	closesocket(sockClient);
 	WSACleanup();
 
 	
+	return 1;
+}
+
+
+DWORD WINAPI delayTime(LPVOID lpParam) {
+
+		CSDKDemoApp  *app_ = (CSDKDemoApp*)lpParam;
+	while (true)
+	{
+		Sleep(1000);
+		if (app_->m_sdk_login_ui_mgr) {
+			if (app_->m_sdk_login_ui_mgr->isInMeetingNow()) {
+				break;
+			}
+		
+		}
+	}
+
+	DWORD dwSokectServerThreadID;
+
+	HANDLE ghSocketServerThread = CreateThread(
+		NULL,              // default security
+		0,                 // default stack size
+		createSokectListener,        // name of the thread function
+		app_,              // no thread parameters
+		0,                 // default startup flags
+		&dwSokectServerThreadID);
 	return 1;
 }
 
@@ -890,11 +1130,13 @@ void SokectListener(CSDKDemoApp &app_) {
 	HANDLE ghSocketServerThread = CreateThread(
 		NULL,              // default security
 		0,                 // default stack size
-		createSokectListener,        // name of the thread function
+		delayTime,        // name of the thread function
 		&app_,              // no thread parameters
 		0,                 // default startup flags
 		&dwSokectServerThreadID);
 }
+
+
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nCmdShow)
 {
@@ -914,7 +1156,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*l
 
 		::CloseHandle(handle);
 		
-		// ÒÑ¾­ÓĞÊµÀıÁË£¬ÍË³ö¡£
+		// å·²ç»æœ‰å®ä¾‹äº†ï¼Œé€€å‡ºã€‚
 		return FALSE;
 	}
 
@@ -934,6 +1176,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*l
 		&app_,              // no thread parameters
 		0,                 // default startup flags
 		&dwThreadID);
+
 	SokectListener(app_);
 
 	HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);

@@ -152,6 +152,9 @@ class CSDKLoginUIMgr :
 	public CWindowWnd, 
 	public INotifyUI
 {
+private:
+	bool inMeetingFlag;
+
 public:
 	CSDKLoginUIMgr();
 	virtual ~CSDKLoginUIMgr();
@@ -183,7 +186,9 @@ public:
 	bool LogOut();
 	void ChangeUIforLoginFailed();
 	void ChangeUIforJoinFailed();
-
+	std::string getMeetingId();
+	void setInMeetingNow(bool flag);
+	bool isInMeetingNow();
 	void NotifyAuthDone();
 	wstring parseUri(const wstring& request, const wstring& _url);
 	wstring parseURL2(wstring str, wstring key);
@@ -206,7 +211,7 @@ protected:
 	CLabelUI*          m_waitingLabelUI;
 	CGifAnimUI*		   m_gifWaiting;
 	CVerticalLayoutUI* m_currentPage;
-
+	
 	COptionUI* m_btnLoginWithEmail;
 	COptionUI* m_btnRestAPI;
 	COptionUI* m_btnLoginWithSSO;
