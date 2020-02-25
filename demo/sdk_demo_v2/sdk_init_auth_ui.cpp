@@ -88,7 +88,8 @@ void CInitSDKUIGroup::DoInitBtnClick()
 			customiezed_ui_mode = m_chkCustomizedUI->GetCheck();
 		if (customiezed_ui_mode)
 			initParam.obConfigOpts.optionalFeatures = ENABLE_CUSTOMIZED_UI_FLAG;
-
+		//initParam.obConfigOpts.optionalFeatures = ENABLE_CUSTOMIZED_UI_FLAG;
+		
 		if (ZOOM_SDK_NAMESPACE::SDKERR_SUCCESS != m_initSDKWorkFlow.InitSDK(initParam, true))
 		{
 			if (m_mainFrame)
@@ -342,7 +343,7 @@ void CAuthSDKUIGroup::Show()
 {
 	if (m_AuthSDKPage)
 	{
-		m_AuthSDKPage->SetVisible(true);
+		m_AuthSDKPage->SetVisible(false);
 		if (m_mainFrame)
 		{
 			m_mainFrame->SetCurrentPage(m_AuthSDKPage);

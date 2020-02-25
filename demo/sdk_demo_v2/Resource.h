@@ -30,6 +30,7 @@
 #define IDXML_ANNOTATE_STAMP_WINDOW_UI          147
 #define IDXML_ANNOTATE_SPOLIGHT_WINDOW_UI       148
 #define IDXML_ANNOTATE_CLEAR_WINDOW_UI          149
+#define IDXML_DOWNLOAD_PROGRESS_UI				150
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED

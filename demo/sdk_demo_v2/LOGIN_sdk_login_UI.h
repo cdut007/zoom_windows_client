@@ -7,6 +7,7 @@
 #include "LOGIN_join_meeting_only_workflow.h"
 #include "LOGIN_restapi_without_login_workflow.h"
 #include "sdk_demo_app_common.h"
+#include "DownloadProgressWindow.h"
 /////////////////////////
 enum loginTabPage
 {
@@ -190,6 +191,8 @@ public:
 	void setInMeetingNow(bool flag);
 	bool isInMeetingNow();
 	void NotifyAuthDone();
+	void checkUpgrade();
+	void destryUpgradeWindow();
 	wstring parseUri(const wstring& request, const wstring& _url);
 	wstring parseURL2(wstring str, wstring key);
 	std::wstring s2ws(const std::string& s);
@@ -222,4 +225,6 @@ protected:
 	CVerticalLayoutUI* m_sso_login_page;
 	CVerticalLayoutUI* m_restApi_login_page;
 	CVerticalLayoutUI* m_only_join_page;
+	CDownloadProgressUIMgr* m_download_frame;
+
 };

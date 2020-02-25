@@ -191,6 +191,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SETTINGS_virtualBG_workflow.cpp" />
+    <ClCompile Include="DownloadProgressWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sdk_demo_v2.h">
@@ -395,6 +396,7 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="SETTINGS_virtualBG_workflow.h" />
+    <ClInclude Include="DownloadProgressWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
