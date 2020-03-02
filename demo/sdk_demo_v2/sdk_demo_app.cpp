@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "sdk_demo_app.h"
 #include "display_cc_ui.h"
+//#include "screen.h"
+
 void CSDKDemoApp::Run(HINSTANCE hInstance)
 {
 	CPaintManagerUI::SetInstance(hInstance);
@@ -12,6 +14,8 @@ void CSDKDemoApp::Run(HINSTANCE hInstance)
 	m_sdk_login_ui_mgr = new CSDKLoginUIMgr();
 	if(!m_sdk_login_ui_mgr)
 		return;
+
+	//screenCall(1);
 	
 	m_sdk_init_auth_ui->SetEvent(this);
 	m_sdk_init_auth_ui->Create(NULL, _T("金蝉会商系统v1.0.2"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);

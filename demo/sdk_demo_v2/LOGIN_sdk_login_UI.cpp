@@ -118,12 +118,43 @@ BOOL download(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func)
 		delete[] pInfoBuffer;
 		DWORD dwBytesRead = 0;
 		pMessageBody = new BYTE[dwFileSile + 1];
+		// 保存文件
+		HANDLE hFile;
+		hFile = ::CreateFile(SavePath, GENERIC_WRITE | GENERIC_READ, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);   // 打开一个文件，获取文件句柄  设置属性为可读可写
+		if (NULL == hFile)
+		{
+			throw 0;
+		}
+		BYTE* lpReadeBuffer = pMessageBody;
+		int currentCount = 0;
 		if (NULL != pMessageBody)
 		{
-			if (!InternetReadFile(hHttpRequest, pMessageBody, dwFileSile, &dwBytesRead))
+			do {
+				
+				InternetReadFile(hHttpRequest, lpReadeBuffer, 1024 * 8, &dwBytesRead);
+			
+				lpReadeBuffer += dwBytesRead;
+				currentCount += dwBytesRead;
+				Func(dwFileSile, currentCount);
+				
+				//Sleep(100);
+			} while (dwBytesRead > 0);
+
+//			if (!InternetReadFile(hHttpRequest, pMessageBody, dwFileSile, &dwBytesRead))
+//			{
+//				throw 0;
+//			}
+
+		
+			
+			unsigned long Bytes;
+			if (NULL == WriteFile(hFile, pMessageBody, dwFileSile, &Bytes, NULL))   //向文件写入数据
 			{
+				CloseHandle(hFile);
 				throw 0;
 			}
+
+
 		}
 		else
 		{
@@ -132,20 +163,7 @@ BOOL download(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func)
 		TCHAR szlog2[MAX_PATH] = { 0 };
 		wsprintf(szlog2, _T("下载成功文件\n"));
 		OutputDebugString(szlog2);
-		// 保存文件
-		HANDLE hFile;
-		hFile = ::CreateFile(SavePath, GENERIC_WRITE | GENERIC_READ, NULL, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);   // 打开一个文件，获取文件句柄  设置属性为可读可写
-		if (NULL == hFile)
-		{
-			throw 0;
-		}
-		unsigned long Bytes;
-		if (NULL == WriteFile(hFile, pMessageBody, dwFileSile, &Bytes, NULL))   //向文件写入数据
-		{
-			CloseHandle(hFile);
-			throw 0;
-		}
-
+		
 		TCHAR szlog3[MAX_PATH] = { 0 };
 		wsprintf(szlog3, _T("保存文件成功\n"));
 		OutputDebugString(szlog3);
@@ -1366,7 +1384,7 @@ void CSDKLoginUIMgr::NotifyAuthDone()
 		SwitchToWaitingPage(L"auto login...", true);
 	}
 	//check download file upgrade is ready.
-	//checkUpgrade();
+	checkUpgrade();
 }
 void CSDKLoginUIMgr::destryUpgradeWindow() {
 	if (m_download_frame)
@@ -1385,7 +1403,9 @@ void CSDKLoginUIMgr::checkUpgrade() {
 	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
 	PathRemoveFileSpec(exeFullPath);
 	wstring fileDir = exeFullPath;
-	TCHAR * v1 = (wchar_t *)(fileDir + _T("rrrrrrrrrrr_setup.jpg")).c_str();
+	//::MessageBox(NULL, fileDir.c_str(), L"提示", MB_OK);
+	TCHAR * v1 = (wchar_t *)(fileDir + L"\\rrrrrrrrrrr_setup.jpg").c_str();
+	//DeleteFile(v1);
 	download(L"https://img0.pconline.com.cn/pconline/2002/25/13242263_1582506697260200_thumb.jpg", v1, &dcallback);
 
 	if (NULL == m_download_frame)
