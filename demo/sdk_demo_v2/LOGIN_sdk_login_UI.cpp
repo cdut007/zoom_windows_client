@@ -981,6 +981,11 @@ void CSDKLoginUIMgr::initCheckUri(){
 		LocalFree(szArgList);
 	}
 }
+DWORD WINAPI checkVersion(LPVOID lpParamter) {
+	CSDKLoginUIMgr *p = (CSDKLoginUIMgr*)lpParamter;
+	p->checkUpgrade();
+	return 0;
+}
 
 DWORD WINAPI checkClick(LPVOID lpParamter)
 {
@@ -1384,7 +1389,9 @@ void CSDKLoginUIMgr::NotifyAuthDone()
 		SwitchToWaitingPage(L"auto login...", true);
 	}
 	//check download file upgrade is ready.
-	checkUpgrade();
+	HANDLE hThread2 = CreateThread(NULL, 0, checkVersion, this, 0, NULL);
+	CloseHandle(hThread2);
+	
 }
 void CSDKLoginUIMgr::destryUpgradeWindow() {
 	if (m_download_frame)
@@ -1398,30 +1405,34 @@ void CSDKLoginUIMgr::destryUpgradeWindow() {
 	}
 }
 void CSDKLoginUIMgr::checkUpgrade() {
-	wchar_t exeFullPath[MAX_PATH]; // Full path   
-	string strPath = "";
-	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
-	PathRemoveFileSpec(exeFullPath);
-	wstring fileDir = exeFullPath;
-	//::MessageBox(NULL, fileDir.c_str(), L"提示", MB_OK);
-	TCHAR * v1 = (wchar_t *)(fileDir + L"\\rrrrrrrrrrr_setup.jpg").c_str();
-	//DeleteFile(v1);
-	download(L"https://img0.pconline.com.cn/pconline/2002/25/13242263_1582506697260200_thumb.jpg", v1, &dcallback);
+	CZoomHttpRequestHelper* httpHelper = new CZoomHttpRequestHelper();
+	if (httpHelper->CheckVersion()) {
+		TCHAR szFilePath[MAX_PATH + 1] = { 0 };
+		TCHAR szFileName[MAX_PATH + 1] = { 0 };
+		GetModuleFileName(NULL, szFilePath, MAX_PATH);
+		(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+		wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.exe"));
+		wstring fileDir = szFileName;
+		TCHAR * v1 = (wchar_t *)fileDir.c_str();
 
-	if (NULL == m_download_frame)
-	{
-		m_download_frame = new CDownloadProgressUIMgr;
+		download(L"https://img0.pconline.com.cn/pconline/2002/25/13242263_1582506697260200_thumb.jpg", v1, &dcallback);
+
 		if (NULL == m_download_frame)
 		{
-			return;
+			m_download_frame = new CDownloadProgressUIMgr;
+			if (NULL == m_download_frame)
+			{
+				return;
+			}
+			m_download_frame->Create(m_hWnd, _T("版本更新"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+			m_download_frame->SetIcon(IDI_ICON_LOGO);
 		}
-		m_download_frame->Create(m_hWnd, _T("版本更新"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
-		m_download_frame->SetIcon(IDI_ICON_LOGO);
+		else
+		{
+			m_download_frame->ShowWindow(true);
+		}
 	}
-	else
-	{
-		m_download_frame->ShowWindow(true);
-	}
+	
 }
 
 /////////////////////////////////////////////////////////////////

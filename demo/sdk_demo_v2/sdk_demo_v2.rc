@@ -176,4 +176,7 @@ stamp_qm_press.png                  ZPIMGRES                "./res/annotate/stam
 tool_spolight_default.png           ZPIMGRES                "./res/annotate/tool_spolight_default.png"
 tool_spolight_pressed.png           ZPIMGRES                "./res/annotate/tool_spolight_pressed.png" 
 tool_arrow_default.png              ZPIMGRES                "./res/annotate/tool_arrow_default.png"
-tool_arrow_pressed.png              ZPIMGRES                "./res/annotate/tool_arrow_pressed.png" 
+tool_arrow_pressed.png              ZPIMGRES                "./res/annotate/tool_arrow_pressed.png"
+pro1.jpg 							ZPIMGRES				"./res/pro1.jpg"
+pro2.jpg 							ZPIMGRES				"./res/pro2.jpg"
+buttons.png 						ZPIMGRES				"./res/buttons.png"

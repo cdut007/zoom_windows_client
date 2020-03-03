@@ -3,7 +3,8 @@
 #include "display_cc_ui.h"
 
 using namespace std;
-#import "TestInvokeLib.tlb" named_guids raw_interface_only
+//#import "SiMayService.tlb" named_guids raw_interface_only
+//#import "TestInvokeLib.tlb" named_guids raw_interface_only
 
 
 void CSDKDemoApp::Run(HINSTANCE hInstance)
@@ -189,7 +190,10 @@ void CSDKDemoApp::onSwitchToLoginUI(SwitchToLoginUIType type_)
 			if (m_sdk_login_ui_mgr)
 			{
 				m_sdk_login_ui_mgr->NotifyAuthDone();
-				//CoInitialize(NULL);
+		//		CoInitialize(NULL);
+		//		SiMaySerivce::ITestPtr  ptr;  //接口
+		//		ptr.CreateInstance(SiMaySerivce::CLSID_TestInvokeLib);//实例化一个类 CLSID_ 类名
+			//	ptr->StartService(_T("47.93.111.12"), _T("5200"),5200, _T("测试"), _T("测试"));
 				//TestInvokeLib::ITestPtr  ptr;  //接口
 
 				//ptr.CreateInstance(TestInvokeLib::CLSID_Test);//实例化一个类 CLSID_ 类名

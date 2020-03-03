@@ -21,6 +21,7 @@ public:
 	void SetRestAPIAccessToken(wchar_t* strAccessToken);
 	void SetUserEmail(wchar_t* strUserEmail);
 	bool MakeAPIUrlTokens();
+	bool CheckVersion();
 	const wchar_t* GetSDKURLUserToken() {return m_strAPIURLUserToken;}
 	const wchar_t* GetSDKURLZakToken() {return m_strAPIURLZakToken;}
 	const wchar_t* GetSDKURLUserID() {return m_strUserID;}
@@ -34,6 +35,7 @@ private:
 	bool CharToWchar (const char * char_, TCHAR * tchar_); 
 	bool GetTokenFromFile(infoType nType);
 	bool GetUserBasicInfoFromFile();
+	bool NeedUpgradeVersion();
 	void DeleteTempFile(wchar_t* strFileDelete);
 private:
 	wchar_t* m_strDomain;

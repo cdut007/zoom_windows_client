@@ -5,6 +5,8 @@
 
 #define PRODUCT_HOST_URL _T("https://api.zoom.us/v2/users/")
 #define DEV_HOST_URL _T("https://dev.zoom.us/v2/users/")
+#define VERSION_HOST_CHECK_URL _T("http://39.107.127.11:9090/review/hasEntryRegistraion?reviewId=14f8ce45-5939-11ea-8978-00163e06891b&bookUserId=2")
+#define APP_VERSION 1
 CZoomHttpRequestHelper::CZoomHttpRequestHelper()
 {
 	m_strAccessToken = NULL;
@@ -37,6 +39,172 @@ void CZoomHttpRequestHelper::SetUserEmail(wchar_t* strUserEmail)
 {
 	if(strUserEmail)
 		m_strUserEmail = strUserEmail;
+}
+
+bool CZoomHttpRequestHelper::CheckVersion()
+{
+	bool bRet(false);
+	TCHAR szRealUrl[1024];
+	TCHAR szHostName[1024];
+	TCHAR szUrlPath[1024];
+
+	wsprintf(szRealUrl, VERSION_HOST_CHECK_URL);
+
+	OutputDebugString(szRealUrl);
+	OutputDebugString(_T("\n"));
+	URL_COMPONENTS crackedURL = { 0 };
+	crackedURL.dwStructSize = sizeof(URL_COMPONENTS);
+	crackedURL.lpszHostName = szHostName;
+	crackedURL.dwHostNameLength = ARRAYSIZE(szHostName);
+	crackedURL.lpszUrlPath = szUrlPath;
+	crackedURL.dwUrlPathLength = ARRAYSIZE(szUrlPath);
+	InternetCrackUrl(szRealUrl, (DWORD)_tcslen(szRealUrl), 0, &crackedURL);
+	HINTERNET hInternet = InternetOpen(_T("Microsoft InternetExplorer"), INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+	if (hInternet == NULL)
+		return false;
+
+	HINTERNET hHttpSession = InternetConnect(hInternet, crackedURL.lpszHostName, crackedURL.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
+	if (hHttpSession == NULL)
+	{
+		OutputDebugString(_T("hHttpSession is null"));
+		OutputDebugString(_T("\n"));
+		InternetCloseHandle(hInternet);
+		return false;
+	}
+	DWORD dwFlags =   INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_UI;
+
+	HINTERNET hHttpRequest = HttpOpenRequest(hHttpSession, _T("GET"), crackedURL.lpszUrlPath, NULL, _T(""), NULL, dwFlags, 0);
+	if (hHttpRequest == NULL)
+	{
+		InternetCloseHandle(hHttpSession);
+		InternetCloseHandle(hInternet);
+		OutputDebugString(_T("hHttpRequest is null"));
+		OutputDebugString(_T("\n"));
+		return false;
+	}
+
+	DWORD dwRetCode = 0;
+	DWORD dwSizeOfRq = sizeof(DWORD);
+
+	if (!HttpSendRequest(hHttpRequest, NULL, 0, NULL, 0) ||
+		!HttpQueryInfo(hHttpRequest, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &dwRetCode, &dwSizeOfRq, NULL)
+		|| dwRetCode >= 400)
+	{
+		InternetCloseHandle(hHttpRequest);
+		InternetCloseHandle(hHttpSession);
+		InternetCloseHandle(hInternet);
+		OutputDebugString(_T("HttpSendRequest is null"));
+		OutputDebugString(_T("\n"));
+		return false;
+	}
+
+	DWORD dwContentLen;
+
+	if (!InternetQueryDataAvailable(hHttpRequest, &dwContentLen, 0, 0) || dwContentLen == 0)
+	{
+		InternetCloseHandle(hHttpRequest);
+		InternetCloseHandle(hHttpSession);
+		InternetCloseHandle(hInternet);
+		OutputDebugString(_T("InternetQueryDataAvailable is null"));
+		OutputDebugString(_T("\n"));
+		return false;
+	}
+
+	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
+	TCHAR szFileName[MAX_PATH + 1] = { 0 };
+	GetModuleFileName(NULL, szFilePath, MAX_PATH);
+	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("check_version_result.json"));
+
+	FILE* file = _wfopen(szFileName, _T("wb+"));
+	if (file == NULL)
+	{
+		OutputDebugString(_T("_wfopen is null"));
+		OutputDebugString(_T("\n"));
+		InternetCloseHandle(hHttpRequest);
+		InternetCloseHandle(hHttpSession);
+		InternetCloseHandle(hInternet);
+		return false;
+	}
+
+	DWORD dwError;
+	DWORD dwBytesRead;
+	DWORD nCurrentBytes = 0;
+	wchar_t szBuffer[1024] = { 0 };
+	while (TRUE)
+	{
+		if (InternetReadFile(hHttpRequest, szBuffer, sizeof(szBuffer), &dwBytesRead))
+		{
+			if (dwBytesRead == 0)
+			{
+				break;
+			}
+			nCurrentBytes += dwBytesRead;
+			fwrite(szBuffer, 1, dwBytesRead, file);
+		}
+		else
+		{
+			dwError = GetLastError();
+			OutputDebugString(_T("InternetReadFile is null"));
+			OutputDebugString(_T("\n"));
+			break;
+		}
+	}
+
+	fclose(file);
+	InternetCloseHandle(hInternet);
+	InternetCloseHandle(hHttpSession);
+	InternetCloseHandle(hHttpRequest);
+
+	return NeedUpgradeVersion();
+}
+bool CZoomHttpRequestHelper::NeedUpgradeVersion()
+{
+	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
+	TCHAR szFileName[MAX_PATH + 1] = { 0 };
+	GetModuleFileName(NULL, szFilePath, MAX_PATH);
+	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("check_version_result.json"));
+
+	FILE* file = _wfopen(szFileName, _T("rb+"));
+	if (file == NULL)
+	{
+		OutputDebugString(_T("_wfopen InternetReadFile is null"));
+		OutputDebugString(_T("\n"));
+		return false;
+	}
+	long length = 0;
+	fseek(file, 0, SEEK_END);
+	length = ftell(file);
+	if (length <= 0)
+	{
+		fclose(file);
+		DeleteTempFile(szFileName);
+		OutputDebugString(_T("_wfopen SEEK_END is null"));
+		OutputDebugString(_T("\n"));
+		return false;
+	}
+	rewind(file);
+	char* buf = new char[length + 1];
+	char* pzFirst = NULL;
+	char* pzSecond = NULL;
+	char cstrUserID[32] = { 0 };
+	buf[0] = 0;
+	fread(buf, length, length, file);
+	fclose(file);
+	buf[length] = 0;
+	//get user id first
+	pzFirst = strstr(buf, "\"status\":true");
+	pzSecond = strstr(buf, "\"status\":false");
+	int versionCode = APP_VERSION;
+	delete[] buf;
+	DeleteTempFile(szFileName);
+	if (pzFirst)
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 bool CZoomHttpRequestHelper::MakeAPIUrlTokens()
@@ -293,7 +461,9 @@ bool CZoomHttpRequestHelper::GetUserBasicInfoFromFile()
 		{
 			cstrUserID[i] = pzFirst[i+6];
 		}
-		CharToWchar(cstrUserID, m_strUserID);
+
+		int myint1 = std::stoi(cstrUserID);
+
 	}
 	else
 	{
