@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "sdk_demo_app.h"
 #include "display_cc_ui.h"
-//#include "screen.h"
+
+using namespace std;
+#import "TestInvokeLib.tlb" named_guids raw_interface_only
+
 
 void CSDKDemoApp::Run(HINSTANCE hInstance)
 {
@@ -14,8 +17,7 @@ void CSDKDemoApp::Run(HINSTANCE hInstance)
 	m_sdk_login_ui_mgr = new CSDKLoginUIMgr();
 	if(!m_sdk_login_ui_mgr)
 		return;
-
-	//screenCall(1);
+	
 	
 	m_sdk_init_auth_ui->SetEvent(this);
 	m_sdk_init_auth_ui->Create(NULL, _T("金蝉会商系统v1.0.2"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
@@ -187,6 +189,11 @@ void CSDKDemoApp::onSwitchToLoginUI(SwitchToLoginUIType type_)
 			if (m_sdk_login_ui_mgr)
 			{
 				m_sdk_login_ui_mgr->NotifyAuthDone();
+				//CoInitialize(NULL);
+				//TestInvokeLib::ITestPtr  ptr;  //接口
+
+				//ptr.CreateInstance(TestInvokeLib::CLSID_Test);//实例化一个类 CLSID_ 类名
+				//ptr->TestMessage(_T("你好"));
 			}
 		}
 		break;
