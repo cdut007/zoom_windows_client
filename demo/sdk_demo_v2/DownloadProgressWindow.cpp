@@ -176,7 +176,7 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 	TCHAR szFileName[MAX_PATH + 1] = { 0 };
 	GetModuleFileName(NULL, szFilePath, MAX_PATH);
 	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
-	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.exe"));
+	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.msi"));
 	wstring fileDir = szFileName;
 	TCHAR * v1 = (wchar_t *)fileDir.c_str();
 	SHELLEXECUTEINFO shExecInfo = { 0 };
@@ -318,7 +318,7 @@ void CDownloadProgressUIMgr::download(CDownloadProgressUIMgr *p) {
 	TCHAR szFileName[MAX_PATH + 1] = { 0 };
 	GetModuleFileName(NULL, szFilePath, MAX_PATH);
 	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
-	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.exe"));
+	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.msi"));
 	wstring fileDir = szFileName;
 	TCHAR * v1 = (wchar_t *)fileDir.c_str();
 

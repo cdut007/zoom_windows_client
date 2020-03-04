@@ -6,7 +6,7 @@
 #define PRODUCT_HOST_URL _T("https://api.zoom.us/v2/users/")
 #define DEV_HOST_URL _T("https://dev.zoom.us/v2/users/")
 #define APP_VERSION 100
-#define VERSION_HOST_CHECK_URL _T("http://39.107.127.11:9966/attachment/download?attachmentId=100")
+#define VERSION_HOST_CHECK_URL _T("http://39.107.127.11:9966/attachment/checkVersion?version=100")
 
 CZoomHttpRequestHelper::CZoomHttpRequestHelper()
 {
