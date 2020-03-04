@@ -5,8 +5,9 @@
 
 #define PRODUCT_HOST_URL _T("https://api.zoom.us/v2/users/")
 #define DEV_HOST_URL _T("https://dev.zoom.us/v2/users/")
-#define VERSION_HOST_CHECK_URL _T("http://39.107.127.11:9090/review/hasEntryRegistraion?reviewId=14f8ce45-5939-11ea-8978-00163e06891b&bookUserId=2")
 #define APP_VERSION 1
+#define VERSION_HOST_CHECK_URL _T("http://39.107.127.11:9090/download?version=1")
+
 CZoomHttpRequestHelper::CZoomHttpRequestHelper()
 {
 	m_strAccessToken = NULL;
@@ -47,8 +48,8 @@ bool CZoomHttpRequestHelper::CheckVersion()
 	TCHAR szRealUrl[1024];
 	TCHAR szHostName[1024];
 	TCHAR szUrlPath[1024];
-
-	wsprintf(szRealUrl, VERSION_HOST_CHECK_URL);
+	wstring  url = VERSION_HOST_CHECK_URL;
+	wsprintf(szRealUrl, url.c_str());
 
 	OutputDebugString(szRealUrl);
 	OutputDebugString(_T("\n"));
@@ -158,6 +159,9 @@ bool CZoomHttpRequestHelper::CheckVersion()
 
 	return NeedUpgradeVersion();
 }
+
+
+
 bool CZoomHttpRequestHelper::NeedUpgradeVersion()
 {
 	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
@@ -194,16 +198,24 @@ bool CZoomHttpRequestHelper::NeedUpgradeVersion()
 	fclose(file);
 	buf[length] = 0;
 	//get user id first
-	pzFirst = strstr(buf, "\"status\":true");
-	pzSecond = strstr(buf, "\"status\":false");
-	int versionCode = APP_VERSION;
-	delete[] buf;
-	DeleteTempFile(szFileName);
-	if (pzFirst)
-	{
-		return true;
+	
+	pzFirst = strstr(buf, "http");
+	if (!pzFirst ) {
+		return false;
 	}
-	this->downloadUrl = L"https://download.microsoft.com/download/E/F/D/EFD52638-B804-4865-BB57-47F4B9C80269/NDP462-DevPack-KB3151934-ENU.exe";
+	//pzSecond = strstr(buf, "\"status\":false");
+	int versionCode = APP_VERSION;
+	DeleteTempFile(szFileName);
+	string str = buf;
+	 int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+    std::wstring wstrTo( size_needed, 0 );
+    MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+	if (wstrTo.empty()) {
+		return false;
+	}
+
+	this->downloadUrl = wstrTo;
+	delete[]buf;
 	return true;
 }
 
