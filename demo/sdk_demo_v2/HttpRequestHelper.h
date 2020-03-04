@@ -27,6 +27,7 @@ public:
 	const wchar_t* GetSDKURLUserID() {return m_strUserID;}
 	const UINT64 GetSDKUserPMI() {return m_userPMI;}
 	void SetRestAPIDomain(wchar_t* strDomain);
+	wstring downloadUrl;
 	 
 private:
 	void getResponse();

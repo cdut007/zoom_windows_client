@@ -5,6 +5,9 @@
 #include "UIlib.h"
 using namespace DuiLib;
 
+
+DWORD WINAPI checkVersion(LPVOID lpParamter);
+
 class CDownloadProgressUIMgr :
 	public CWindowWnd,
 	public INotifyUI
@@ -21,16 +24,20 @@ public:
 	UILIB_RESOURCETYPE GetResourceType() const { return UILIB_RESOURCE; }
 	virtual void		OnFinalMessage(HWND) {}
 	virtual LRESULT	HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void setDownloadUrl(wstring url);
 
-protected:
+public:
 	void InitWindow();
 	void DoClickPauseBtn();
 	void DoClickResumeBtn();
+	void download(CDownloadProgressUIMgr *p);
 
-private:
+public:
 	CPaintManagerUI m_PaintManager;
 	CButtonUI* m_pause_btn;
 	CButtonUI* m_resume_btn;
+	CProgressUI* download_progress;
+	wstring mUrl;
 };
 
 

@@ -1,19 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Window  layered = "true" bktrans = "true">
-  <!--Font size 9-->
-  <Font id="0" name="Segoe UI" size="12" bold="false"/>
-  <Container size="524,376"  caption="0,0,0,32"   bkcolor="#FFFFFFFF">
-    <!--Container-->
-    <Label float="true" pos="4,10,30,30" align="left" font="1" textcolor="#FF000000" />
-    <Label text="软件名称" float="true" pos="34,10,110,30" endellipsis="true" textcolor="#FF000000" align="left" font="0" />
-    <Progress float="true" pos="110,18,230,22" bkimage="pro1.jpg" foreimage="pro2.jpg" min="0" max="100" value="30"/>
-    <Label text="剩余时间" float="true" pos="110,24,160,54" textcolor="#FF000000" align="left" font="0" />
-    <Label text="下载速度" float="true" pos="165,24,230,54" textcolor="#FF000000" align="left" font="0" />
-    <Label text="下载进度" float="true" pos="235,14,270,54" textcolor="#FF000000" align="left" font="0" />
-    <Label float="true" pos="280,14,350,54" textcolor="#FF000000" align="left" font="0" />
-    <Button tooltip="取消" float="true" pos="370,16,383,28" normalimage="file='buttons.png' source='28,0,41,12'" hotimage="file='buttons.png' source='28,12,41,24'" pushedimage="file='buttons.png' source='28,24,41,36'" />
-    <Button tooltip="暂停" float="true" pos="340,16,353,28" normalimage="file='buttons.png' source='14,0,27,12'" hotimage="file='buttons.png' source='14,12,27,24'" pushedimage="file='buttons.png' source='14,24,27,36'" />
-    <Button tooltip="继续" visible="false" float="true" pos="340,16,353,28" normalimage="file='buttons.png' source='0,0,13,12'" hotimage="file='buttons.png' source='0,12,13,24'" pushedimage="file='buttons.png' source='0,24,13,36'" />
-  </Container>
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window>
+    <Font name="Segoe UI" size="12" bold="false" italic="false" />
+    <Container width="400" height="200" bkcolor="#FFFFFFFF">
+        <Progress name="download_progress" float="true" pos="55,171,0,0" width="373" height="25" bkimage="res=&apos;pro1.jpg&apos; restype=&apos;ZPIMGRES&apos;" textcolor="#FF000000" disabledtextcolor="#FFA7A6AA" align="center" foreimage="res=&apos;pro2.jpg&apos; restype=&apos;ZPIMGRES&apos;" min="0" max="100" value="0" hor="true" />
+        <Button tooltip="继续" visible="false" float="true" pos="340,16,0,0" width="13" height="12" align="center" normalimage="res=&apos;buttons.png&apos; restype=&apos;ZPIMGRES&apos; source=&apos;0,0,13,12&apos;" hotimage="res=&apos;buttons.png&apos; restype=&apos;ZPIMGRES&apos; source=&apos;0,12,13,24&apos;" pushedimage="res=&apos;buttons.png&apos; restype=&apos;ZPIMGRES&apos; source=&apos;0,24,13,36&apos;" />
+    </Container>
 </Window>
-

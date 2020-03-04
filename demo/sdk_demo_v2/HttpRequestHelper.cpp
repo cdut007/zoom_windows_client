@@ -203,8 +203,8 @@ bool CZoomHttpRequestHelper::NeedUpgradeVersion()
 	{
 		return true;
 	}
-	
-	return false;
+	this->downloadUrl = L"https://download.microsoft.com/download/E/F/D/EFD52638-B804-4865-BB57-47F4B9C80269/NDP462-DevPack-KB3151934-ENU.exe";
+	return true;
 }
 
 bool CZoomHttpRequestHelper::MakeAPIUrlTokens()

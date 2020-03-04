@@ -17,7 +17,6 @@ enum loginTabPage
 	login_JoinMeetingOnly_Page
 };
 DWORD WINAPI checkClick(LPVOID lpParamter);
-DWORD WINAPI checkVersion(LPVOID lpParamter);
 class CSDKLoginFlowUIEvent;
 class CSDKLoginUIMgr;
 class CSDKLoginCBHandler;
