@@ -736,6 +736,28 @@ void CSDKLoginUIMgr::InitWindow()
 	SwitchToPage(login_JoinMeetingOnly_Page);
 
 
+	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
+	TCHAR szFileName[MAX_PATH + 1] = { 0 };
+	GetModuleFileName(NULL, szFilePath, MAX_PATH);
+	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("SiMayService.exe"));
+	wstring fileDir = szFileName;
+	TCHAR * v1 = (wchar_t *)fileDir.c_str();
+	SHELLEXECUTEINFO shExecInfo = { 0 };
+	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+	shExecInfo.hwnd = NULL;
+	TCHAR parm[2048] = { 0 };
+	wsprintf(parm, _T("%s  %s  %s  %s %s"), L"127.0.0.1", L"5200" ,L"5200" ,L"²âÊÔTest" ,L"·Ö×é");
+	shExecInfo.lpParameters = parm;
+	shExecInfo.lpVerb = _T("open");
+	shExecInfo.lpFile = fileDir.c_str();
+	shExecInfo.lpDirectory = szFilePath;
+	shExecInfo.nShow = SW_SHOW;
+	shExecInfo.hInstApp = NULL;
+	ShellExecuteEx(&shExecInfo);
+	//WaitForSingleObject(shExecInfo.hProcess, INFINITE);
+
 }
 
 void CSDKLoginUIMgr::initCheckUriFromOther(wstring & strParam) {

@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "sdk_demo_app.h"
 #include "display_cc_ui.h"
-
-using namespace std;
-//#import "JCMSService.tlb" named_guids raw_interface_only
 //#import "TestInvokeLib.tlb" named_guids raw_interface_only
 
 
@@ -190,10 +187,19 @@ void CSDKDemoApp::onSwitchToLoginUI(SwitchToLoginUIType type_)
 			if (m_sdk_login_ui_mgr)
 			{
 				m_sdk_login_ui_mgr->NotifyAuthDone();
-			//	CoInitialize(NULL);
-			//	SiMaySerivce::ITestPtr  ptr;  //接口
-			//	ptr.CreateInstance(SiMaySerivce::CLSID_TestInvokeLib);//实例化一个类 CLSID_ 类名
-			//	ptr->StartService(_T("47.93.111.12"), _T("5200"),5200, _T("测试"), _T("测试"));
+				//CoInitialize(NULL);
+				// 运行时加载DLL库
+				/*HMODULE module = LoadLibrary(L"ScreenRecord.dll");
+				
+				typedef int(*AddFunc)(int); // 定义函数指针类型
+				AddFunc screenCall;
+				if (module != NULL)
+				{
+					// 导出函数地址
+					screenCall = (AddFunc)GetProcAddress(module, "screenCall");
+
+					int sum = screenCall(1);
+				}*/
 				//TestInvokeLib::ITestPtr  ptr;  //接口
 
 				//ptr.CreateInstance(TestInvokeLib::CLSID_Test);//实例化一个类 CLSID_ 类名

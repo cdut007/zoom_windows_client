@@ -64,14 +64,14 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 		}
 
 		//初始化WinInet,获取跟句柄
-		hInternetOpen = ::InternetOpenA(NULL, INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);  //INTERNET_OPEN_TYPE_PRECONFIG
+		hInternetOpen = ::InternetOpenA("Microsoft InternetExplorer", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);  //INTERNET_OPEN_TYPE_PRECONFIG
 		if (NULL == hInternetOpen)
 		{
 			throw 0;
 		}
 
 		//打开一个HTTP的文件协议
-		hHttpConnect = ::InternetConnect(hInternetOpen, szHostName, INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, INTERNET_FLAG_PASSIVE, 0);
+		hHttpConnect = ::InternetConnect(hInternetOpen, szHostName, 9966, NULL, NULL, INTERNET_SERVICE_HTTP, INTERNET_FLAG_PASSIVE, 0);
 		if (NULL == hHttpConnect)
 		{
 			throw 0;
@@ -79,26 +79,28 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 
 		//打开HTTP请求句柄
 
-		hHttpRequest = ::HttpOpenRequest(hHttpConnect, L"GET", szUrlPath, HTTP_VERSION, NULL, NULL, INTERNET_FLAG_NO_UI | INTERNET_FLAG_DONT_CACHE, 1);
+		hHttpRequest =  ::HttpOpenRequest(hHttpConnect, L"GET", szUrlPath, HTTP_VERSION, NULL, NULL, INTERNET_FLAG_NO_UI | INTERNET_FLAG_DONT_CACHE, 1);
 		if (NULL == hHttpRequest)
 		{
 			throw 0;
 		}
 
 
-		if (!::HttpSendRequestA(hHttpRequest, NULL, 0, NULL, NULL))                     //向服务器发送这个请求
+		if (!::HttpSendRequestW(hHttpRequest, NULL, 0, NULL, NULL))                     //向服务器发送这个请求
 		{
 			throw 0;
 		}
-
+		OutputDebugString(L"download file url\n");
+		OutputDebugString(szUrlPath);
 		//  检查HTTP响应消息的头
 		DWORD dwInfoBufferLength = 0;
 		BYTE *pInfoBuffer = NULL;
 		TCHAR szlog[MAX_PATH] = { 0 };
 		wsprintf(szlog, _T("准备下载文件\n"));
 		OutputDebugString(szlog);
-		while (!::HttpQueryInfo(hHttpRequest, HTTP_QUERY_CONTENT_LENGTH, pInfoBuffer, &dwInfoBufferLength, NULL))        //接收服务器返回的信息  (此处我们接收文件的大小)    
+		while (!::HttpQueryInfo(hHttpRequest, HTTP_QUERY_CONTENT_LENGTH , pInfoBuffer, &dwInfoBufferLength, 0))        //接收服务器返回的信息  (此处我们接收文件的大小)    
 		{
+			
 			DWORD dwError = GetLastError();
 			if (dwError == ERROR_INSUFFICIENT_BUFFER)   // 传递给参数的缓冲区太小
 			{
@@ -109,12 +111,14 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 				throw 0;
 			}
 		}
-
+		TCHAR szlog6[MAX_PATH] = { 0 };
+		wsprintf(szlog6, _T("download dwInfoBufferLength size : %d\n"), dwInfoBufferLength);
+		OutputDebugString(szlog6);
 
 		memcpy(&pInfoBuffer[dwInfoBufferLength], "\0", 1);
 
 		//得到的文件大小转换为int型 
-		unsigned long dwFileSile = _wtoi((WCHAR*)pInfoBuffer);
+		unsigned long dwFileSile =  _wtoi((WCHAR*)pInfoBuffer);
 		delete[] pInfoBuffer;
 		DWORD dwBytesRead = 0;
 		pMessageBody = new BYTE[dwFileSile + 1];
@@ -160,6 +164,9 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 		{
 			throw 0;
 		}
+
+		
+
 		TCHAR szlog2[MAX_PATH] = { 0 };
 		wsprintf(szlog2, _T("下载成功文件\n"));
 		OutputDebugString(szlog2);
@@ -313,7 +320,7 @@ void CDownloadProgressUIMgr::download(CDownloadProgressUIMgr *p) {
 	//check download file upgrade is ready.
 	//HANDLE hThread2 = CreateThread(NULL, 0, checkVersion, this, 0, NULL);
 	//CloseHandle(hThread2);
-
+	
 	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
 	TCHAR szFileName[MAX_PATH + 1] = { 0 };
 	GetModuleFileName(NULL, szFilePath, MAX_PATH);
