@@ -111,37 +111,25 @@ bool CZoomHttpRequestHelper::CheckVersion()
 		return false;
 	}
 
-	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
-	TCHAR szFileName[MAX_PATH + 1] = { 0 };
-	GetModuleFileName(NULL, szFilePath, MAX_PATH);
-	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
-	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("check_version_result.json"));
-
-	FILE* file = _wfopen(szFileName, _T("wb+"));
-	if (file == NULL)
-	{
-		OutputDebugString(_T("_wfopen is null"));
-		OutputDebugString(_T("\n"));
-		InternetCloseHandle(hHttpRequest);
-		InternetCloseHandle(hHttpSession);
-		InternetCloseHandle(hInternet);
-		return false;
-	}
+	
 
 	DWORD dwError;
 	DWORD dwBytesRead;
 	DWORD nCurrentBytes = 0;
-	wchar_t szBuffer[1024] = { 0 };
+	char szBuffer[1025] = { 0 };
+	string data = "";
 	while (TRUE)
 	{
-		if (InternetReadFile(hHttpRequest, szBuffer, sizeof(szBuffer), &dwBytesRead))
+		if (InternetReadFile(hHttpRequest, szBuffer,1024, &dwBytesRead))
 		{
 			if (dwBytesRead == 0)
 			{
 				break;
 			}
-			nCurrentBytes += dwBytesRead;
-			fwrite(szBuffer, 1, dwBytesRead, file);
+		
+			szBuffer[dwBytesRead] = '\0';
+			data += szBuffer;
+			ZeroMemory(szBuffer, 1024);
 		}
 		else
 		{
@@ -152,61 +140,30 @@ bool CZoomHttpRequestHelper::CheckVersion()
 		}
 	}
 
-	fclose(file);
+	
 	InternetCloseHandle(hInternet);
 	InternetCloseHandle(hHttpSession);
 	InternetCloseHandle(hHttpRequest);
 
-	return NeedUpgradeVersion();
+	return NeedUpgradeVersion(data);
 }
 
 
 
-bool CZoomHttpRequestHelper::NeedUpgradeVersion()
+bool CZoomHttpRequestHelper::NeedUpgradeVersion(string str)
 {
-	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
-	TCHAR szFileName[MAX_PATH + 1] = { 0 };
-	GetModuleFileName(NULL, szFilePath, MAX_PATH);
-	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
-	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("check_version_result.json"));
-
-	FILE* file = _wfopen(szFileName, _T("rb+"));
-	if (file == NULL)
-	{
-		OutputDebugString(_T("_wfopen InternetReadFile is null"));
-		OutputDebugString(_T("\n"));
-		return false;
-	}
-	long length = 0;
-	fseek(file, 0, SEEK_END);
-	length = ftell(file);
-	if (length <= 0)
-	{
-		fclose(file);
-		DeleteTempFile(szFileName);
-		OutputDebugString(_T("_wfopen SEEK_END is null"));
-		OutputDebugString(_T("\n"));
-		return false;
-	}
-	rewind(file);
-	char* buf = new char[length + 1];
+	
 	char* pzFirst = NULL;
 	char* pzSecond = NULL;
-	char cstrUserID[32] = { 0 };
-	buf[0] = 0;
-	fread(buf, length, length, file);
-	fclose(file);
-	buf[length] = 0;
-	//get user id first
 	
-	pzFirst = strstr(buf, "http");
-	if (!pzFirst ) {
+	//get user id first
+	if (str.find("http") == string::npos)//²»´æÔÚ¡£
+	{
 		return false;
 	}
 	//pzSecond = strstr(buf, "\"status\":false");
 	int versionCode = APP_VERSION;
-	DeleteTempFile(szFileName);
-	string str = buf;
+
 	 int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
     std::wstring wstrTo( size_needed, 0 );
     MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
@@ -215,7 +172,6 @@ bool CZoomHttpRequestHelper::NeedUpgradeVersion()
 	}
 
 	this->downloadUrl = wstrTo;
-	delete[]buf;
 	return true;
 }
 

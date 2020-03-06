@@ -36,7 +36,7 @@ private:
 	bool CharToWchar (const char * char_, TCHAR * tchar_); 
 	bool GetTokenFromFile(infoType nType);
 	bool GetUserBasicInfoFromFile();
-	bool NeedUpgradeVersion();
+	bool NeedUpgradeVersion(string buf);
 	void DeleteTempFile(wchar_t* strFileDelete);
 private:
 	wchar_t* m_strDomain;
