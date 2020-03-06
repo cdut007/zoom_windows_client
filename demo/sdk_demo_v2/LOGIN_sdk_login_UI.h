@@ -95,7 +95,7 @@ public:
 	void Show();
 	void Hide();
 	void Notify(TNotifyUI& msg);
-	void  setUri(const wstring& id, const wstring& name);
+	void  setUri(const wstring& id, const wstring& name, const wstring& expert);
 	void DoWithoutLoginStartJoinMeetingBtnClick();
 public:
 	virtual void onMeetingStatusChanged(ZOOM_SDK_NAMESPACE::MeetingStatus status, int iResult = 0);
@@ -113,6 +113,7 @@ public:
 	CSDKLoginUIMgr*	   m_parentFrame;
 	CSDKWithoutLoginStartJoinMeetingFlow  m_withoutLoginJoinMeetingWorkFlow;
 	bool m_bInMeeting;
+	wstring expert;
 };
 
 class CSDKRestAPIUserUIGroup : public CSDKRestAPIUserUIEvent

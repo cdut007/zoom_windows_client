@@ -5,6 +5,7 @@
 #include "httpRequestHelper.h"
 #include "zoomHmacSHA256.h"
 #include "mess_info.h"
+#include<Tlhelp32.h>
 #include <regex>
 #include "DownloadProgressWindow.h"
 
@@ -306,11 +307,12 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::Notify( TNotifyUI& msg )
 	}
 }
 
-void CSDKWithoutLoginStartJoinMeetingUIGroup::setUri(const wstring& id, const wstring& name) {
+void CSDKWithoutLoginStartJoinMeetingUIGroup::setUri(const wstring& id, const wstring& name, const wstring& expert) {
 	m_editMeetingNumber->SetText(id.c_str());
 	m_editMeetingNumber->Invalidate();
 	m_editScreenName->SetText(name.c_str());
 	m_editScreenName->Invalidate();
+	this->expert = expert;
 }
 
 void CSDKWithoutLoginStartJoinMeetingUIGroup::DoWithoutLoginStartJoinMeetingBtnClick()
@@ -416,6 +418,38 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::onMeetingStatusChanged(ZOOM_SDK_NA
 				m_parentFrame->SetCurrentPage(m_WithoutLoginStartJoinMeetingPage);
 				ShowWindow(m_parentFrame->GetHWND(), 0);
 				m_parentFrame->setInMeetingNow(true);
+				std::wstring MeetingNumber = m_editMeetingNumber->GetText().GetData();
+				std::wstring screenName = m_editScreenName->GetText().GetData();
+				if (screenName.empty()) {
+					screenName = L"未知用户";
+				}
+
+				if (!expert.empty()) {
+					//MessageBox(NULL, _T("jinchan:reeeeee"), L"Arglist contents", MB_OK);
+					TCHAR szFilePath[MAX_PATH + 1] = { 0 };
+					TCHAR szFileName[MAX_PATH + 1] = { 0 };
+					GetModuleFileName(NULL, szFilePath, MAX_PATH);
+					(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+					wsprintf(szFileName, _T("%s%s"), szFilePath, _T("SiMayService.exe"));
+					wstring fileDir = szFileName;
+					TCHAR * v1 = (wchar_t *)fileDir.c_str();
+					SHELLEXECUTEINFO shExecInfo = { 0 };
+					shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+					shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+					shExecInfo.hwnd = NULL;
+					TCHAR parm[2048] = { 0 };
+					wsprintf(parm, _T("%s  %s  %s  %s %s"), L"desktop.jcebid.com", L"5200", L"5200", screenName, MeetingNumber);
+					shExecInfo.lpParameters = parm;
+					shExecInfo.lpVerb = _T("open");
+					shExecInfo.lpFile = fileDir.c_str();
+					shExecInfo.lpDirectory = szFilePath;
+					shExecInfo.nShow = SW_SHOW;
+					shExecInfo.hInstApp = NULL;
+					ShellExecuteEx(&shExecInfo);
+					
+				}
+
+			
 			//	m_parentFrame->GetAppEvent()->onShowLoggedInUI(Demo_Meeting_Join_Only);
 			}
 		}
@@ -742,13 +776,14 @@ void CSDKLoginUIMgr::InitWindow()
 void CSDKLoginUIMgr::initCheckUriFromOther(wstring & strParam) {
 	wstring id = parseUri(_T("id"), strParam);
 	wstring name = parseUri(_T("name"), strParam);
+	wstring expert = parseUri(_T("expert"), strParam);
 	wstring idStr = id;
 	wstring nameStr = UrlDecode(name);
 	//ShowErrorMessage(name.c_str());
 	OutputDebugString(_T("print name\n"));
 	OutputDebugString(nameStr.c_str());
 	OutputDebugString(_T("\n"));
-	m_WithoutLoginStartJoinMeetingUIGroup.setUri(idStr, nameStr);
+	m_WithoutLoginStartJoinMeetingUIGroup.setUri(idStr, nameStr, expert);
 	m_WithoutLoginStartJoinMeetingUIGroup.DoWithoutLoginStartJoinMeetingBtnClick();
 }
 void CSDKLoginUIMgr::initCheckUri(){
@@ -778,13 +813,14 @@ void CSDKLoginUIMgr::initCheckUri(){
 				//ShowErrorMessage(strParam.c_str());
 				wstring id = parseUri(_T("id"), strParam);
 				wstring name = parseUri(_T("name"), strParam);
+				wstring expert = parseUri(_T("expert"), strParam);
 				wstring idStr = id;
 				wstring nameStr = UrlDecode(name);
 				//ShowErrorMessage(name.c_str());
 				OutputDebugString(_T("print name\n"));
 				OutputDebugString(nameStr.c_str());
 				OutputDebugString(_T("\n"));
-				m_WithoutLoginStartJoinMeetingUIGroup.setUri(idStr, nameStr);
+				m_WithoutLoginStartJoinMeetingUIGroup.setUri(idStr, nameStr, expert);
 				
 
 				
@@ -795,6 +831,8 @@ void CSDKLoginUIMgr::initCheckUri(){
 		LocalFree(szArgList);
 	}
 }
+
+
 
 
 DWORD WINAPI checkClick(LPVOID lpParamter)
@@ -813,30 +851,13 @@ DWORD WINAPI checkClick(LPVOID lpParamter)
 		p->DoWithoutLoginStartJoinMeetingBtnClick();
 	}
 
-	//MessageBox(NULL, _T("jinchan:reeeeee"), L"Arglist contents", MB_OK);
-	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
-	TCHAR szFileName[MAX_PATH + 1] = { 0 };
-	GetModuleFileName(NULL, szFilePath, MAX_PATH);
-	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
-	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("SiMayService.exe"));
-	wstring fileDir = szFileName;
-	TCHAR * v1 = (wchar_t *)fileDir.c_str();
-	SHELLEXECUTEINFO shExecInfo = { 0 };
-	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-	shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	shExecInfo.hwnd = NULL;
-	TCHAR parm[2048] = { 0 };
-	wsprintf(parm, _T("%s  %s  %s  %s %s"), L"desktop.jcebid.com", L"5200", L"5200", L"测试Test", L"分组");
-	shExecInfo.lpParameters = parm;
-	shExecInfo.lpVerb = _T("open");
-	shExecInfo.lpFile = fileDir.c_str();
-	shExecInfo.lpDirectory = szFilePath;
-	shExecInfo.nShow = SW_SHOW;
-	shExecInfo.hInstApp = NULL;
-	ShellExecuteEx(&shExecInfo);
+	
+	
 	//WaitForSingleObject(shExecInfo.hProcess, INFINITE);
 	return 0L;
 }
+
+
 
 std::string CSDKLoginUIMgr::ws2s(const std::wstring& wstr)
 {
@@ -1211,6 +1232,14 @@ void CSDKLoginUIMgr::ChangeUIforJoinFailed()
 	SwitchToWaitingPage(L"",false);
 }
 
+
+DWORD WINAPI checkVersionRequest(LPVOID lpParamter)
+{
+	CSDKLoginUIMgr *p = (CSDKLoginUIMgr*)lpParamter;
+	p->checkUpgrade();
+	return 0;
+}
+
 void CSDKLoginUIMgr::NotifyAuthDone()
 {
 	HANDLE hThread = CreateThread(NULL, 0, checkClick, &m_WithoutLoginStartJoinMeetingUIGroup, 0, NULL);
@@ -1223,7 +1252,9 @@ void CSDKLoginUIMgr::NotifyAuthDone()
 		SwitchToWaitingPage(L"auto login...", true);
 	}
 
-	checkUpgrade();
+	HANDLE hThread2 = CreateThread(NULL, 0, checkVersionRequest, this, 0, NULL);
+	CloseHandle(hThread2);
+	
 	
 }
 void CSDKLoginUIMgr::destryUpgradeWindow() {
@@ -1257,6 +1288,16 @@ void CSDKLoginUIMgr::checkUpgrade() {
 			m_download_frame->setDownloadUrl(httpHelper->downloadUrl);
 			m_download_frame->ShowWindow(true);
 		}
+
+		//The message loop    
+		MSG msg;
+		while (GetMessage(&msg, NULL, 0, 0))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+
 	}
 	
 }

@@ -285,7 +285,10 @@ void  dcallback(int ContentSize, int file_size , CDownloadProgressUIMgr* downloa
 	wsprintf(szlog, _T("download count:%d, size : %d\n"), ContentSize, file_size);
 	OutputDebugString(szlog);
 	int progress =  (int)(((float)ContentSize / file_size) * 100);
-	downloadUIMgr->download_progress->SetValue(progress);
+	if (downloadUIMgr && downloadUIMgr->download_progress) {
+		downloadUIMgr->download_progress->SetValue(progress);
+	}
+	
 }
 
 void CDownloadProgressUIMgr::Notify(TNotifyUI& msg)
