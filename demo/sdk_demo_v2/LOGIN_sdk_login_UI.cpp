@@ -802,9 +802,9 @@ DWORD WINAPI checkClick(LPVOID lpParamter)
 
 	//
 
-	
+
 	CSDKWithoutLoginStartJoinMeetingUIGroup *p = (CSDKWithoutLoginStartJoinMeetingUIGroup*)lpParamter;
-	while (!p->m_parentFrame ||!p->m_editMeetingNumber)
+	while (!p->m_parentFrame || !p->m_editMeetingNumber)
 	{
 		Sleep(1000);
 	}
@@ -826,7 +826,7 @@ DWORD WINAPI checkClick(LPVOID lpParamter)
 	shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 	shExecInfo.hwnd = NULL;
 	TCHAR parm[2048] = { 0 };
-	wsprintf(parm, _T("%s  %s  %s  %s %s"), L"127.0.0.1", L"5200", L"5200", L"测试Test", L"分组");
+	wsprintf(parm, _T("%s  %s  %s  %s %s"), L"desktop.jcebid.com", L"5200", L"5200", L"测试Test", L"分组");
 	shExecInfo.lpParameters = parm;
 	shExecInfo.lpVerb = _T("open");
 	shExecInfo.lpFile = fileDir.c_str();
