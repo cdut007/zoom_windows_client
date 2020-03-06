@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <wininet.h>
+#include <AccCtrl.h>
+#include <AclAPI.h>
 #include "DownloadProgressWindow.h"
 
 CDownloadProgressUIMgr::CDownloadProgressUIMgr()
@@ -179,20 +181,15 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 		//Func(dwContentSize, ReadedLen);
 		CloseHandle(hFile);
 		delete[] pMessageBody;
-		TCHAR szFilePath[MAX_PATH + 1] = { 0 };
-	TCHAR szFileName[MAX_PATH + 1] = { 0 };
-	GetModuleFileName(NULL, szFilePath, MAX_PATH);
-	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
-	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.msi"));
-	wstring fileDir = szFileName;
-	TCHAR * v1 = (wchar_t *)fileDir.c_str();
+
+	TCHAR * v1 = SavePath;// (wchar_t *)fileDir.c_str();
 	SHELLEXECUTEINFO shExecInfo = { 0 };
 	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 	shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 	shExecInfo.hwnd = NULL;
 	shExecInfo.lpVerb = _T("open");
-	shExecInfo.lpFile = fileDir.c_str();
-	shExecInfo.lpDirectory = szFilePath;
+	shExecInfo.lpFile = SavePath;
+	//shExecInfo.lpDirectory = szFilePath;
 	shExecInfo.nShow = SW_SHOW;
 	shExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&shExecInfo);
@@ -315,6 +312,53 @@ void CDownloadProgressUIMgr::setDownloadUrl(wstring url) {
 	this->mUrl = url;
 }
 
+int EnableFileAccountPrivilege(PCTSTR pszPath, PCTSTR pszAccount)
+{
+	BOOL bSuccess = TRUE;
+	EXPLICIT_ACCESS ea;
+	PACL pNewDacl = NULL;
+	PACL pOldDacl = NULL;
+	do
+	{
+		// 获取文件(夹)安全对象的DACL列表
+
+		if (ERROR_SUCCESS != GetNamedSecurityInfo((LPTSTR)pszPath, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pOldDacl, NULL, NULL))
+		{
+			bSuccess = FALSE;
+			break;
+
+		}
+
+		// 此处不可直接用AddAccessAllowedAce函数,因为已有的DACL长度是固定,必须重新创建一个DACL对象
+
+		// 生成指定用户帐户的访问控制信息(这里指定赋予全部的访问权限)
+
+		::BuildExplicitAccessWithName(&ea, (LPTSTR)pszAccount, GENERIC_ALL, GRANT_ACCESS, SUB_CONTAINERS_AND_OBJECTS_INHERIT);
+
+		// 创建新的ACL对象(合并已有的ACL对象和刚生成的用户帐户访问控制信息)
+
+		if (ERROR_SUCCESS != ::SetEntriesInAcl(1, &ea, pOldDacl, &pNewDacl))
+		{
+			bSuccess = FALSE;
+			break;
+		}
+
+		// 设置文件(夹)安全对象的DACL列表
+		if (ERROR_SUCCESS != ::SetNamedSecurityInfo((LPTSTR)pszPath, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, pNewDacl, NULL))
+		{
+			bSuccess = FALSE;
+		}
+	} while (FALSE);
+
+	if (NULL != pNewDacl)
+	{
+		::LocalFree(pNewDacl);
+	}
+
+	return bSuccess;
+}
+
+
 void CDownloadProgressUIMgr::download(CDownloadProgressUIMgr *p) {
 
 	//check download file upgrade is ready.
@@ -323,10 +367,24 @@ void CDownloadProgressUIMgr::download(CDownloadProgressUIMgr *p) {
 	
 	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
 	TCHAR szFileName[MAX_PATH + 1] = { 0 };
-	GetModuleFileName(NULL, szFilePath, MAX_PATH);
+	int Strlen = GetTempPath(MAX_PATH, szFilePath);
+
+	if (Strlen < 1)
+	{
+		 //"获取临时路径失败.");
+		GetModuleFileName(NULL, szFilePath, MAX_PATH);
+	}
+	else
+	{
+		//设置临时路径为工作目录
+		SetCurrentDirectory(szFilePath);
+	}
 	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
 	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.msi"));
+
 	wstring fileDir = szFileName;
+	
+
 	TCHAR * v1 = (wchar_t *)fileDir.c_str();
 
 	downloadFile((wchar_t*)mUrl.c_str(), v1, &dcallback,p);
