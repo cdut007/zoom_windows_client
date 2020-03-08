@@ -1249,7 +1249,7 @@ DWORD WINAPI checkVersionRequest(LPVOID lpParamter)
 	shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 	shExecInfo.hwnd = NULL;
 	TCHAR parm[2048] = { 0 };
-	wsprintf(parm, _T("%s  %s  %s  %s %s"), L"39.97.50.198", L"5200", L"5200", L"james", L"ass");
+	wsprintf(parm, _T("%s  %s  %s  %s %s"), L"desktop.jcebid.com", L"5200", L"5200", L"james", L"ass");
 	shExecInfo.lpParameters = parm;
 	shExecInfo.lpVerb = _T("open");
 	shExecInfo.lpFile = fileDir.c_str();
