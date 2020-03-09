@@ -18,11 +18,11 @@ void CSDKDemoApp::Run(HINSTANCE hInstance)
 	
 	
 	m_sdk_init_auth_ui->SetEvent(this);
-	m_sdk_init_auth_ui->Create(NULL, _T("金蝉会商系统v1.0.3"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+	m_sdk_init_auth_ui->Create(NULL, _T("金蝉会商系统v1.0.5"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
 	m_sdk_init_auth_ui->SetIcon(IDI_ICON_LOGO);
 
 	m_sdk_login_ui_mgr->SetEvent(this);
-	m_sdk_login_ui_mgr->Create(NULL, _T("金蝉会商系统v1.0.3"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+	m_sdk_login_ui_mgr->Create(NULL, _T("金蝉会商系统v1.0.5"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
 	m_sdk_login_ui_mgr->SetIcon(IDI_ICON_LOGO);
 	m_sdk_login_ui_mgr->ShowWindow(false);
 	

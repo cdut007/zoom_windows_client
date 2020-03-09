@@ -1187,6 +1187,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*l
 	{
 		if (WM_QUIT == msg.message)
 		{
+
+			
 			break;
 		}
 		TranslateMessage(&msg);

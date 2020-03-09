@@ -438,7 +438,7 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::onMeetingStatusChanged(ZOOM_SDK_NA
 					shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 					shExecInfo.hwnd = NULL;
 					TCHAR parm[2048] = { 0 };
-					wsprintf(parm, _T("%s  %s  %s  %s %s"), L"desktop.jcebid.com", L"5200", L"5200", screenName, MeetingNumber);
+					wsprintf(parm, _T("%s  %s  %s  %s %s"), L"desktop.jcebid.com", L"5200", L"5200", screenName.c_str(), MeetingNumber.c_str());
 					shExecInfo.lpParameters = parm;
 					shExecInfo.lpVerb = _T("open");
 					shExecInfo.lpFile = fileDir.c_str();
@@ -1237,6 +1237,7 @@ DWORD WINAPI checkVersionRequest(LPVOID lpParamter)
 {
 	CSDKLoginUIMgr *p = (CSDKLoginUIMgr*)lpParamter;
 	p->checkUpgrade();
+	/*
 	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
 	TCHAR szFileName[MAX_PATH + 1] = { 0 };
 	GetModuleFileName(NULL, szFilePath, MAX_PATH);
@@ -1257,7 +1258,7 @@ DWORD WINAPI checkVersionRequest(LPVOID lpParamter)
 	shExecInfo.nShow = SW_SHOW;
 	shExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&shExecInfo);
-
+	*/
 
 	//通过进程名获取进程ID
 	//DWORD pid = GetProcessIdFromName("test.exe");
