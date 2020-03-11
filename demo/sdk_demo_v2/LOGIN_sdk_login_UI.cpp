@@ -1297,11 +1297,96 @@ void CSDKLoginUIMgr::destryUpgradeWindow() {
 		}
 	}
 }
+
+//***************************************************
+// 函数名称: EnableDebugPrivilege
+// 函数说明: 管理员权限提权
+// 方    式：public
+// 输入参数: void
+// 输出参数：void
+// 返 回 值: true-提权成功，false-提权失败
+// 作    者: 
+// 创建时间: 2018-11-5
+// 备    注：
+//***************************************************
+bool EnableDebugPrivilege()
+{
+	HANDLE hToken;
+	LUID sedebugnameValue;
+	TOKEN_PRIVILEGES tkp;
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
+		return false;
+	}
+
+	if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &sedebugnameValue)) {
+		__try {
+			if (hToken) {
+				CloseHandle(hToken);
+			}
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {};
+		return false;
+	}
+
+	tkp.PrivilegeCount = 1;
+	tkp.Privileges[0].Luid = sedebugnameValue;
+	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	if (!AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(tkp), NULL, NULL)) {
+		__try {
+			if (hToken) {
+				CloseHandle(hToken);
+			}
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {};
+		return false;
+	}
+
+	return true;
+}
+
+//判断管理员权限
+bool IsAdmin()
+{
+	BOOL b;
+	SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+	PSID AdministratorsGroup;
+	b = AllocateAndInitializeSid(&NtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &AdministratorsGroup);
+	if (b)
+	{
+		if (!CheckTokenMembership(NULL, AdministratorsGroup, &b))
+		{
+			b = FALSE;
+		}
+		FreeSid(AdministratorsGroup);
+	}
+
+	return(b);
+}
+
+
 void CSDKLoginUIMgr::checkUpgrade() {
+
+
+	
+
+	
 	CZoomHttpRequestHelper* httpHelper = new CZoomHttpRequestHelper();
 	
 	if (httpHelper->CheckVersion()) {
 		
+		if (!IsAdmin()) {
+			OutputDebugString(_T("EnableDebugPrivilege  cmd......\n"));
+			if (!EnableDebugPrivilege()) {
+				OutputDebugString(_T("EnableDebugPrivilege  failed......\n"));
+				::MessageBox(NULL, L"请使用管理员权限运行软件升级最新版本！", L"版本升级提示", MB_OK);
+				return;
+			}
+
+			::MessageBox(NULL, L"请使用管理员权限运行软件升级至最新版本！", L"版本升级提示", MB_OK);
+			return;
+		}
+
 		if (NULL == m_download_frame)
 		{
 			m_download_frame = new CDownloadProgressUIMgr;
