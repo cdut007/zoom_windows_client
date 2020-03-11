@@ -25,6 +25,7 @@ public:
 	virtual void		OnFinalMessage(HWND) {}
 	virtual LRESULT	HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void setDownloadUrl(wstring url);
+	void SetEvent(CSDKDemoAppEvent* pAppEvent);
 
 public:
 	void InitWindow();
@@ -38,6 +39,7 @@ public:
 	CButtonUI* m_resume_btn;
 	CProgressUI* download_progress;
 	wstring mUrl;
+	CSDKDemoAppEvent* m_pAppEvent;
 };
 
 

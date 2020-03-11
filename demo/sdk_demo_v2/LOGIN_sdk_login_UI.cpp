@@ -1299,6 +1299,7 @@ void CSDKLoginUIMgr::destryUpgradeWindow() {
 }
 void CSDKLoginUIMgr::checkUpgrade() {
 	CZoomHttpRequestHelper* httpHelper = new CZoomHttpRequestHelper();
+	
 	if (httpHelper->CheckVersion()) {
 		
 		if (NULL == m_download_frame)
@@ -1311,12 +1312,16 @@ void CSDKLoginUIMgr::checkUpgrade() {
 			m_download_frame->setDownloadUrl(httpHelper->downloadUrl);
 			m_download_frame->Create(m_hWnd, _T("°æ±¾¸üÐÂ"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
 			m_download_frame->SetIcon(IDI_ICON_LOGO);
+			m_download_frame->SetEvent(m_pAppEvent);
 		}
 		else
 		{
 			m_download_frame->setDownloadUrl(httpHelper->downloadUrl);
 			m_download_frame->ShowWindow(true);
+			m_download_frame->SetEvent(m_pAppEvent);
 		}
+
+		
 
 		//The message loop    
 		MSG msg;
@@ -1325,6 +1330,8 @@ void CSDKLoginUIMgr::checkUpgrade() {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+
+
 
 
 	}

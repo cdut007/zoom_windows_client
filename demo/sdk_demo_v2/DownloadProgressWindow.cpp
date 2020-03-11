@@ -2,6 +2,7 @@
 #include <wininet.h>
 #include <AccCtrl.h>
 #include <AclAPI.h>
+#include "sdk_demo_app_common.h"
 #include "DownloadProgressWindow.h"
 
 CDownloadProgressUIMgr::CDownloadProgressUIMgr()
@@ -193,7 +194,11 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 	shExecInfo.nShow = SW_SHOW;
 	shExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&shExecInfo);
-	WaitForSingleObject(shExecInfo.hProcess, INFINITE);
+	if (download_mgr->m_pAppEvent)
+	{
+		download_mgr->m_pAppEvent->onQuitApp();
+	}
+	//WaitForSingleObject(shExecInfo.hProcess, INFINITE);
 	}
 	catch (...)
 	{
@@ -216,6 +221,12 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 		return FALSE;
 	}
 	return TRUE;
+}
+
+
+void CDownloadProgressUIMgr::SetEvent(CSDKDemoAppEvent* pAppEvent)
+{
+	m_pAppEvent = pAppEvent;
 }
 
 
