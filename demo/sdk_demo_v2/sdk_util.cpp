@@ -112,6 +112,148 @@ void MD5::reset() {
 	_state[3] = 0x10325476;
 }
 
+//转换BYTE字符串为TCHAR类型的字符串
+//参数：输入，BYTE*
+//参数：输出，TCHAR*
+//参数：输入，传入的字符串长度
+//返回：转换后的TCHAR类型的字符串的长度
+int BinToStr(BYTE* sbyte, TCHAR* string, int len)
+{
+	int TemWordD;
+	int p = 0;
+
+	if (len < 1)
+		return 0;
+
+	for (int i = 0; i < len; i++)
+	{
+		if (sbyte[i] > 127)
+		{
+			if ((i + 1) == len)
+			{
+				TemWordD = sbyte[i];
+			}
+			else
+			{
+				TemWordD = (sbyte[i] * 256) | sbyte[i + 1];
+				i++;
+			}
+		}
+		else
+		{
+			TemWordD = sbyte[i];
+		}
+
+		if (i < len)
+		{
+			string[p] = (TCHAR)TemWordD;
+			p++;
+		}
+
+	}
+	if (p > 0)
+		string[p] = _T('/0');
+
+	return p;
+}
+
+wstring MD5::GetFileMd5(LPCWSTR FileDirectory)
+{
+	HANDLE hFile = CreateFile(FileDirectory, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)                                        //如果CreateFile调用失败
+	{
+		OutputDebugString(_T("CreateFile go wrong\n"));             //提示CreateFile调用失败，并输出错误号。visual studio中可在“工具”>“错误查找”中利用错误号得到错误信息。
+		CloseHandle(hFile);
+	}
+	HCRYPTPROV hProv = NULL;
+	if (CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT) == FALSE)       //获得CSP中一个密钥容器的句柄
+	{
+		OutputDebugString(_T("CryptAcquireContext go wrong\n"));
+	}
+	HCRYPTPROV hHash = NULL;
+	if (CryptCreateHash(hProv, CALG_MD5, 0, 0, &hHash) == FALSE)     //初始化对数据流的hash，创建并返回一个与CSP的hash对象相关的句柄。这个句柄接下来将被CryptHashData调用。
+	{
+		OutputDebugString(_T("CryptCreateHash go wrong\n"));
+	}
+	DWORD dwFileSize = GetFileSize(hFile, 0);    //获取文件的大小
+	if (dwFileSize == 0xFFFFFFFF)               //如果获取文件大小失败
+	{
+		OutputDebugString(_T("GetFileSize go wrong\n"));
+	
+	}
+	byte* lpReadFileBuffer = new byte[dwFileSize];
+	DWORD lpReadNumberOfBytes;
+	if (ReadFile(hFile, lpReadFileBuffer, dwFileSize, &lpReadNumberOfBytes, NULL) == 0)        //读取文件
+	{
+		OutputDebugString(_T("ReadFile go wrong\n"));
+	}
+	if (CryptHashData(hHash, lpReadFileBuffer, lpReadNumberOfBytes, 0) == FALSE)      //hash文件
+	{
+		OutputDebugString(_T("CryptHashData go wrong\n"));
+	}
+
+	delete[] lpReadFileBuffer;
+	CloseHandle(hFile);          //关闭文件句柄
+	//BYTE *pbHash;
+	//DWORD dwHashLen = sizeof(DWORD);
+	//以下注释掉的代码不用使用，因为已经知道md5值就占32个字节，没有必要通过CryptGetHashParam函数来得到字节数。
+	/*
+	BYTE *pbHashSize;
+	if (!(pbHashSize=(byte*)malloc(dwHashLen)))      //为pbHashSize分配内存
+	{
+	cout<<"memory allocation failed:"<<GetLastError()<<endl;
+	}
+	//将第二个参数的值设为HP_HASHSIZE。dwHashLen中存放着hash值的字节数。这个调用必须在将第三个参数设置为HP_HASHVAL的调用前，这样才能分配正确数量的内存。
+	if (CryptGetHashParam(hHash,HP_HASHSIZE,pbHashSize,&dwHashLen,0))
+	{
+	free(pbHashSize);
+	}
+	else
+	{
+	cout<<"get size go wrong"<<GetLastError()<<endl;
+	}*/
+	DWORD dwSize;
+	DWORD dwLen = sizeof( dwSize );
+
+	if (CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)(&dwSize), &dwLen, 0))      //我也不知道为什么要先这样调用CryptGetHashParam，这块是参照的msdn       
+	{
+	}
+	else
+	{
+		OutputDebugString(_T("get length wrong\n"));
+	}
+
+	BYTE * pHash = new BYTE[dwSize];
+	dwLen = dwSize;
+
+
+	if (CryptGetHashParam(hHash, HP_HASHVAL, pHash, &dwLen, 0))            //获得md5值
+	{
+		OutputDebugString(_T("get file md5 is:"));
+		
+		string md5Info = bytesToHexString(pHash, dwLen);
+		
+		int num = MultiByteToWideChar(CP_UTF8, 0, md5Info.c_str(), -1, NULL, 0);
+		wchar_t *wide = new wchar_t[num];
+		MultiByteToWideChar(CP_UTF8, 0, md5Info.c_str(), -1, wide, num);
+		std::wstring w_str(wide);
+		delete[] wide;
+		return w_str;
+		
+	}
+	//善后工作
+	if (CryptDestroyHash(hHash) == FALSE)          //销毁hash对象
+	{
+		OutputDebugString(_T("CryptDestroyHash wrong\n"));
+	}
+	if (CryptReleaseContext(hProv, 0) == FALSE)
+	{
+		OutputDebugString(_T("CryptReleaseContext wrong\n"));
+	}
+
+	return _T("");
+}
+
 /* Updating the context with a input buffer. */
 void MD5::update(const void* input, size_t length) {
 	update((const byte*)input, length);

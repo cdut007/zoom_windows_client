@@ -4,6 +4,7 @@
 #include <AclAPI.h>
 #include "sdk_demo_app_common.h"
 #include "DownloadProgressWindow.h"
+#include <io.h>
 
 CDownloadProgressUIMgr::CDownloadProgressUIMgr()
 {
@@ -31,6 +32,25 @@ typedef struct _URL_INFO
 }URL_INFO, *PURL_INFO;
 
 
+char* TCHAR2char(const TCHAR* STR)
+
+{
+
+	//返回字符串的长度
+
+	int size = WideCharToMultiByte(CP_ACP, 0, STR, -1, NULL, 0, NULL, FALSE);
+
+	//申请一个多字节的字符串变量
+
+	char* str = new char[sizeof(char) * size];
+
+	//将STR转成str
+
+	WideCharToMultiByte(CP_ACP, 0, STR, -1, str, size, NULL, FALSE);
+
+	return str;
+
+}
 
 
 //与网页的交互,从网页下载 （参数1为文件的URL，参数2为下载的文件的绝对路径，包括文件名及文件类型）
@@ -184,21 +204,76 @@ BOOL downloadFile(TCHAR *lpDwownURL, TCHAR *SavePath, DownLoadCallback Func, CDo
 		delete[] pMessageBody;
 
 	TCHAR * v1 = SavePath;// (wchar_t *)fileDir.c_str();
-	SHELLEXECUTEINFO shExecInfo = { 0 };
-	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-	shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	shExecInfo.hwnd = NULL;
-	shExecInfo.lpVerb = _T("open");
-	shExecInfo.lpFile = SavePath;
-	//shExecInfo.lpDirectory = szFilePath;
-	shExecInfo.nShow = SW_SHOW;
-	shExecInfo.hInstApp = NULL;
-	ShellExecuteEx(&shExecInfo);
-	if (download_mgr->m_pAppEvent)
-	{
-		download_mgr->m_pAppEvent->onQuitApp();
+	if (download_mgr->screenApp) {
+
+	//	::MessageBox(NULL, L"组件更新成功！", L"提示", MB_OK);
+		if (true) {
+			CHAR* source = TCHAR2char(v1);
+
+			TCHAR szFilePath[MAX_PATH + 1] = { 0 };
+			TCHAR szFileName[MAX_PATH + 1] = { 0 };
+			GetModuleFileName(NULL, szFilePath, MAX_PATH);
+			(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+			wsprintf(szFileName, _T("%s%s"), szFilePath, _T("SiMayService.exe"));
+
+			if (!_access(TCHAR2char(szFileName), 0))//如果文件存在:
+			{
+				TCHAR szFileWithMd5Path[MAX_PATH + 1] = { 0 };
+				wstring bakName = _T("SiMayServiceBak_") + download_mgr->fileMd5 + _T(".exe");
+				wsprintf(szFileWithMd5Path, _T("%s%s"), szFilePath, bakName.c_str());
+				//假如存在同样老的md5文件，这个时候可以考虑先删除
+				DeleteFileW(szFileWithMd5Path);
+
+				if (!rename(TCHAR2char(szFileName), TCHAR2char(szFileWithMd5Path)))//成功
+				{
+
+					if (!_access(source, 0))//如果文件存在:结尾带了new.exe
+					{
+
+
+						if (!rename(source, TCHAR2char(szFileName)))//成功
+						{
+							//删除当前文件，
+							DeleteFileW(v1);
+							::MessageBox(NULL, L"组件更新成功！", L"提示", MB_OK);
+						}
+						else {
+							::MessageBox(NULL, L"未知错误：0x001组件更新失败，请先卸载，启动会议从新下载！", L"提示", MB_OK);
+						}
+					}
+					else {
+						::MessageBox(NULL, L"未知错误：0x002组件更新失败，请先卸载，启动会议从新下载！", L"提示", MB_OK);
+					}
+
+				}
+				else {
+					
+					::MessageBox(NULL, L"未知错误：0x003组件更新失败，请先卸载，启动会议从新下载！", L"提示", MB_OK);
+				}
+			}
+			else {
+				::MessageBox(NULL, L"未知错误：0x004组件更新失败，请先卸载，启动会议从新下载！", L"提示", MB_OK);
+			}
+		}
 	}
-	//WaitForSingleObject(shExecInfo.hProcess, INFINITE);
+	else {
+		SHELLEXECUTEINFO shExecInfo = { 0 };
+		shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+		shExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+		shExecInfo.hwnd = NULL;
+		shExecInfo.lpVerb = _T("open");
+		shExecInfo.lpFile = SavePath;
+		//shExecInfo.lpDirectory = szFilePath;
+		shExecInfo.nShow = SW_SHOW;
+		shExecInfo.hInstApp = NULL;
+		ShellExecuteEx(&shExecInfo);
+		if (download_mgr->m_pAppEvent)
+		{
+			download_mgr->m_pAppEvent->onQuitApp();
+		}
+		//WaitForSingleObject(shExecInfo.hProcess, INFINITE);
+	
+	}
 	}
 	catch (...)
 	{
@@ -373,6 +448,7 @@ int EnableFileAccountPrivilege(PCTSTR pszPath, PCTSTR pszAccount)
 }
 
 
+
 void CDownloadProgressUIMgr::download(CDownloadProgressUIMgr *p) {
 
 	//check download file upgrade is ready.
@@ -381,20 +457,29 @@ void CDownloadProgressUIMgr::download(CDownloadProgressUIMgr *p) {
 	
 	TCHAR szFilePath[MAX_PATH + 1] = { 0 };
 	TCHAR szFileName[MAX_PATH + 1] = { 0 };
-	int Strlen = GetTempPath(MAX_PATH, szFilePath);
 
-	if (Strlen < 1)
-	{
-		 //"获取临时路径失败.");
+
+	if (this->screenApp) {
+
 		GetModuleFileName(NULL, szFilePath, MAX_PATH);
+		(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+		wsprintf(szFileName, _T("%s%s"), szFilePath, _T("SiMayServiceNew.exe"));
+	}else {
+		int Strlen = GetTempPath(MAX_PATH, szFilePath);
+		if (Strlen < 1)
+		{
+			//"获取临时路径失败.");
+			GetModuleFileName(NULL, szFilePath, MAX_PATH);
+		}
+		else
+		{
+			//设置临时路径为工作目录
+			SetCurrentDirectory(szFilePath);
+		}
+		(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
+		wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.msi"));
 	}
-	else
-	{
-		//设置临时路径为工作目录
-		SetCurrentDirectory(szFilePath);
-	}
-	(_tcsrchr(szFilePath, _T('\\')))[1] = 0;
-	wsprintf(szFileName, _T("%s%s"), szFilePath, _T("setup.msi"));
+	
 
 	wstring fileDir = szFileName;
 	

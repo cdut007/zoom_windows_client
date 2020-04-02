@@ -38,6 +38,8 @@ public:
 	CButtonUI* m_pause_btn;
 	CButtonUI* m_resume_btn;
 	CProgressUI* download_progress;
+	bool screenApp;
+	wstring fileMd5;
 	wstring mUrl;
 	CSDKDemoAppEvent* m_pAppEvent;
 };

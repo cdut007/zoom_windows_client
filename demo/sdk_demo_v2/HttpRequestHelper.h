@@ -22,12 +22,14 @@ public:
 	void SetUserEmail(wchar_t* strUserEmail);
 	bool MakeAPIUrlTokens();
 	bool CheckVersion();
+	bool CheckScreenVersion();
 	const wchar_t* GetSDKURLUserToken() {return m_strAPIURLUserToken;}
 	const wchar_t* GetSDKURLZakToken() {return m_strAPIURLZakToken;}
 	const wchar_t* GetSDKURLUserID() {return m_strUserID;}
 	const UINT64 GetSDKUserPMI() {return m_userPMI;}
 	void SetRestAPIDomain(wchar_t* strDomain);
 	wstring downloadUrl;
+	wstring fileMd5;
 	 
 private:
 	void getResponse();
@@ -37,6 +39,7 @@ private:
 	bool GetTokenFromFile(infoType nType);
 	bool GetUserBasicInfoFromFile();
 	bool NeedUpgradeVersion(string buf);
+	bool NeedUpgradeScreenVersion(string buf);
 	void DeleteTempFile(wchar_t* strFileDelete);
 private:
 	wchar_t* m_strDomain;

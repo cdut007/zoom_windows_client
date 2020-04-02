@@ -59,6 +59,7 @@ public:
 	MD5(const void* input, size_t length);
 	MD5(const string& str);
 	MD5(ifstream& in);
+	wstring GetFileMd5(LPCWSTR FileDirectory);
 	void update(const void* input, size_t length);
 	void update(const string& str);
 	void update(ifstream& in);

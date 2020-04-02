@@ -1416,9 +1416,40 @@ void CSDKLoginUIMgr::checkUpgrade() {
 			DispatchMessage(&msg);
 		}
 
+	}
+	else if (httpHelper->CheckScreenVersion()) {
+		if (NULL == m_download_frame)
+		{
+			m_download_frame = new CDownloadProgressUIMgr;
+			if (NULL == m_download_frame)
+			{
+				return;
+			}
+			m_download_frame->setDownloadUrl(httpHelper->downloadUrl);
+			m_download_frame->Create(m_hWnd, _T("组件更新"), UI_WNDSTYLE_DIALOG, WS_EX_WINDOWEDGE);
+			m_download_frame->screenApp = true;
+			m_download_frame->fileMd5 = httpHelper->fileMd5;
+			m_download_frame->SetIcon(IDI_ICON_LOGO);
+			m_download_frame->SetEvent(m_pAppEvent);
+		}
+		else
+		{
+			m_download_frame->setDownloadUrl(httpHelper->downloadUrl);
+			m_download_frame->ShowWindow(true);
+			m_download_frame->screenApp = true;
+			m_download_frame->fileMd5 = httpHelper->fileMd5;
+			m_download_frame->SetEvent(m_pAppEvent);
+		}
 
 
 
+		//The message loop    
+		MSG msg;
+		while (GetMessage(&msg, NULL, 0, 0))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 	
 }
