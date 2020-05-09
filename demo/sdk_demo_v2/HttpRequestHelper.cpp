@@ -71,8 +71,8 @@ std::wstring GetFileVersion(TCHAR * strFilePath)
 
 #define PRODUCT_HOST_URL _T("https://api.zoom.us/v2/users/")
 #define DEV_HOST_URL _T("https://dev.zoom.us/v2/users/")
-#define APP_VERSION 108
-#define VERSION_HOST_CHECK_URL _T("http://39.107.127.11:9966/attachment/checkVersion?version=108")
+#define APP_VERSION 109
+#define VERSION_HOST_CHECK_URL _T("http://39.107.127.11:9966/attachment/checkVersion?version=109")
 
 #define APP_SCREEN_VERSION 1
 #define VERSION_HOST_CHECK_SCREEN_URL _T("http://39.107.127.11:9966/attachment/checkScreenVersion?version=1")
