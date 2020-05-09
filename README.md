@@ -3,22 +3,57 @@
 <img src="https://s3.amazonaws.com/user-content.stoplight.io/8987/1541013063688" width="400px" max-height="400px" style="margin:auto;"/>
 </div>
 
+
+## Table of Contents
+- [:rotating_light: Announcement :rotating_light:](#rotating_light-announcement-rotating_light)   
+- [Latest SDK Notifications](#latest-sdk-notifications)   
+- [Full Documentation && Community Support](#full-documentation-community-support)   
+- [What is Zoom Windows SDK?](#what-is-zoom-windows-sdk)   
+- [Disclaimer](#disclaimer)   
+- [Getting Started](#getting-started)   
+  - [Prerequisites](#prerequisites)   
+  - [Installing](#installing)   
+- [Documentation](#documentation)   
+- [Navigating SDK sample files](#navigating-sdk-sample-files)   
+- [SDK Reference](#sdk-reference)   
+- [Versioning](#versioning)   
+- [Change log](#change-log)   
+- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)   
+- [Support](#support)   
+- [License](#license)   
+- [Acknowledgments](#acknowledgments)   
+
+
+
+## :rotating_light: Announcement :rotating_light:
+To align with Zoom’s [recent announcement](https://blog.zoom.us/wordpress/2020/04/22/zoom-hits-milestone-on-90-day-security-plan-releases-zoom-5-0/) pertaining to our security initiative, Zoom Client SDKs have added **AES 256-bit GCM encryption** support, which provides more protection for meeting data and greater resistance to tampering. **The system-wide account enablement of AES 256-bit GCM encryption will take place on June 01, 2020.** You are **strongly recommended** to start the required upgrade to this latest version 4.6.21666.0428 at your earliest convenience. Please note that any Client SDK versions below 4.6.21666.0428 will **no longer be operational** from June 01.
+
+> If you would like to test the latest SDK with AES 256-bit GCM encryption meeting before 05/30, you may:
+> 1. Download the latest version of Zoom client: https://zoom.us/download
+> 2. Visit https://zoom.us/testgcm and launch a GCM enabled meeting with your Zoom client, you will see a Green Shield icon that indicates the GCM encryption is enabled
+> 3. Use SDK to join this meeting
+
 ## Latest SDK Notifications
-1.Our Zoom SDK and Zoom Client share some common resources in the OS, in order to allow Zoom client and Zoom client SDK app work at the same time, since v4.4.56616.1028, we renamed the filename of the following shared resources:
+1. **Starting from 4.6.15798.0403, all DLL files(\*.dll) and EXE files(\*.exe) cannot be re-signed. Please DO NOT re-sign or assign new digital signature to those files as assigning new digital signature on these files could lead to fatal errors.**
+
+2. Our Zoom SDK and Zoom Client share some common resources in the OS, in order to allow Zoom client and Zoom client SDK app work at the same time, since v4.4.56616.1028, we renamed the filename of the following shared resources:
 * `CptHost.exe` -> `zcscpthost.exe`
 * `airhost.exe` -> `zcsairhost.exe`
 * `CptService.exe` -> `zCSCptService.exe`
-2. Kindly advise that **please do not re-sign / assign new digital signature to** the following files as assigning new digital signature on these files could lead to fatal errors:
+
+3. If you are using SDK versions before 4.6.15798.0403, kindly advise that **please do not re-sign / assign new digital signature to** the following files as assigning new digital signature on these files could lead to fatal errors:
    * **CptControl.exe**
-   * **CptHost.exe**
    * **CptInstall.exe**
-   * **CptService.exe**
+   * **CptHost.exe** / **zcscpthost.exe**
+   * **airhost.exe** / **zcsairhost.exe**
+   * **CptService.exe** / **zCSCptService.exe**
    * **CptShare.dll**
    * **zzhost.dll**
-   * **zzplugin.dll**
+   * **zzplugin.dll**(Deprecated since v4.6.15074.0203)
    * **aomhost64.exe**
-3. **Variable Name Changes**: Since [v4.3.1.47204.0325](https://github.com/zoom/zoom-sdk-windows/releases/tag/v4.3.1.47204.0325), we have renamed the term "APP" to "SDK" in our demo to avoid confusion between the term "API" and "APP".
-4. Our brand new [Zoom Developer Community Forum](https://devforum.zoom.us/) is now online!!! Check it out! We are here to help! :D
+   * **zCrashReport.dll**
+   * **libeay32.dll**
+   * **ssleay32.dll**
 
 ## Full Documentation && Community Support
 You can find the full Zoom Windows SDK documentation and the community support forum here:
@@ -84,6 +119,41 @@ The Zoom SDK runs as a `DLL` in the context of the calling application process.
 
 Please visit [[https://marketplace.zoom.us/docs/sdk/native-sdks/windows](https://marketplace.zoom.us/docs/sdk/native-sdks/windows)] for details of each features and functions.
 
+## Navigating SDK sample files
+
+The following table provides the link to the implementation of each features in our demo app:
+
+| UI mode            | Feature                                                      | Corresponding sample files                                   |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Essential features | SDK Initialization & Authentication                          | * [sdk_init_auth_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/sdk_init_auth_ui.cpp) <br />* [init_auth_sdk_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/init_auth_sdk_workflow.cpp) <br />* [sdk_util.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/sdk_util.cpp) |
+|                    | Authenticate with Zoom REST API and start a meeting as API user | * [zoomHmacSHA256.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/zoomHmacSHA256.cpp) <br />* [httpRequestHelper.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/HttpRequestHelper.cpp) <br />* [login_sdk_login_UI.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LOGIN_sdk_login_UI.cpp) <br />* [login_restapi_without_login_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LOGIN_restapi_without_login_workflow.cpp) |
+|                    | Login with email & password                                  | * [login_sdk_login_UI.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LOGIN_sdk_login_UI.cpp) <br />* [login_login_with_email_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LOGIN_login_with_email_workflow.cpp) |
+|                    | Login with SSO token                                         | * [login_sdk_login_UI.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LOGIN_sdk_login_UI.cpp) <br />* [login_login_with_sso_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LOGIN_login_with_sso_workflow.cpp) |
+|                    | Start an instant meeting(For Logged-in user)                 | * [loggedIn_sdk_controller.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LoggedIn_sdk_controller_ui.cpp) <br />* [loggedIn_sdk_controller_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LoggedIn_sdk_controller_workflow.cpp) |
+|                    | Join a meeting                                               | * [join_meeting_for_login_user_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/Join_meeting_for_login_user_ui.cpp) <br />* [join_meeting_for_login_user_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/Join_meeting_for_login_user_workflow.cpp) <br />* [login_join_meeting_only_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/LOGIN_join_meeting_only_workflow.cpp) <br />* [sdk_util.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/sdk_util.cpp) |
+|                    | Schedule a meeting (For logged-in user)                      | * [schedule_meeting_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/schedule_meeting_ui.cpp) <br />* [schedule_meeting_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/schedule_meeting_workflow.cpp) |
+|                    | User management                                              | * [user_manager.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/user_manager.cpp) |
+|                    | Settings                                                     | * [settings_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/settings_ui.cpp) <br />* [settings_audio_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/SETTINGS_audio_workflow.cpp) <br />* [settings_feature_custom_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/SETTINGS_feature_custom_workflow.cpp) <br />* [settings_general_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/SETTINGS_general_workflow.cpp) <br />* [settings_recording_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/SETTINGS_recording_workflow.cpp) <br />* [settings_ui_custom_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/SETTINGS_ui_custom_workflow.cpp) <br />* [settings_video_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/SETTINGS_video_workflow.cpp) <br />* [settings_virtualBG_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/SETTINGS_virtualBG_workflow.cpp) |
+|                    | Invitation                                                   | * [invitation_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/invitation_ui.cpp) <br />* [invitation_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/invitation_workflow.cpp) |
+| Custom UI          | Basic UI management                                          | * [custom_ui_mgr.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/custom_ui_mgr.cpp) <br />* [custom_ui_mgr_flow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/custom_ui_mgr_flow.cpp) |
+|                    | Video                                                        | * [custom_ui_video_flow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/custom_ui_video_flow.cpp) <br />* [custom_ui_video_mgr.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/custom_ui_video_mgr.cpp) |
+|                    | Share                                                        | * [custom_ui_share_flow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/custom_ui_share_flow.cpp) <br />* [custom_ui_share_mgr.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/custom_ui_share_mgr.cpp) |
+|                    | Annotation                                                   | * [annotateBarWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/AnnotateBarWindow.cpp) <br />* [annotateClearWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/AnnotateClearWindow.cpp) <br />* [annotateDrawWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/AnnotateDrawWindow.cpp) <br />* [annotateFormatWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/AnnotateFormatWindow.cpp) <br />* [annotateSplotlightWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/AnnotateSpolightWindow.cpp) <br />* [annotateStampWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/AnnotateStampWindow.cpp) |
+|                    | Arrow                                                        | * [arrow_window.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/arrow_window.cpp) |
+|                    | Camera Control                                               | * [cameraControlWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/CameraControlWindow.cpp) |
+|                    | Recording                                                    | * [customizedUIRecordMgr.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/CustomizedUIRecordMgr.cpp) |
+|                    | Share Toolbar                                                | * [shareToolbarWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/ShareToolbarWindow.cpp) |
+|                    | View Options                                                 | * [viewOptionsWindow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/ViewOptionsWindow.cpp) |
+|                    | Chat                                                         | * [chat_controller_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/chat_controller_ui.cpp) <br />* [chat_controller_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/chat_controller_workflow.cpp) |
+|                    | Close caption                                                | * [close_caption_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/close_caption_ui.cpp) <br />* [close_caption_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/close_caption_workflow.cpp) |
+|                    | Dial-in country                                              | * [dial_in_country_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/dial_in_country_ui.cpp) |
+|                    | Display CC                                                   | * [display_cc_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/display_cc_ui.cpp) |
+|                    | Participant UI                                               | * [participant_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/participant_ui.cpp) |
+|                    | Participant pop up menu                                      | * [participantPopMenu.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/ParticipantPopMenu.cpp) |
+|                    | More features                                                | * [more_features_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/more_features_ui.cpp) <br />* [more_features_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/more_features_workflow.cpp) |
+|                    | More menu                                                    | * [more_menu_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/more_menu_ui.cpp) |
+|                    | Toolbar                                                      | * [toolbar_bottom_ui.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/toolbar_bottom_ui.cpp) <br />* [toolbar_bottom_workflow.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/toolbar_bottom_workflow.cpp) <br />* [toolbar_manager.cpp](https://github.com/zoom/zoom-sdk-windows/blob/6295059767afa50e42ca8a59ce797a3001684c87/demo/sdk_demo_v2/toolbar_manager.cpp) |
+
 ## SDK Reference
 
 You may find the SDK interface reference at [https://marketplace.zoom.us/docs/sdk/native-sdks/windows/sdk-reference](https://marketplace.zoom.us/docs/sdk/native-sdks/windows/sdk-reference).
@@ -100,19 +170,11 @@ Please refer to our [CHANGELOG](https://github.com/zoom/zoom-sdk-windows/blob/ma
 ## Frequently Asked Questions (FAQ)
 
 * :one: `Getting ERROR Code: 105035 while using Windows SDK`:
-  * **In most of the cases, this is caused by resigning or adding new signature to the following files while integrating and deploying our SDK**:
-     * **CptControl.exe**
-     * **CptHost.exe**
-     * **CptInstall.exe**
-     * **CptService.exe**
-     * **CptShare.dll**
-     * **zzhost.dll**
-     * **zzplugin.dll**
-     * **aomhost64.exe**
-   
-   **Please skip signing / do not add any new signatures to the above files. If the error code appears even if the above files are not being re-signed, please visit our [Zoom Developer Community Forum](https://devforum.zoom.us/) and seek help.**
-   
-   
+  * **In most of the cases, this is caused by resigning or adding new signature to the SDK DLL files(\*.dll) and EXE files(\*.exe)**
+
+   **Please skip signing / do not add any new signatures to the DLL files(\*.dll) and EXE files(\*.exe). If the error code appears even if the files are not being re-signed, please visit our [Zoom Developer Community Forum](https://devforum.zoom.us/) and seek help.**
+
+
 * Please visit our [Zoom Developer Community Forum](https://devforum.zoom.us/) for further assistance.
 
 ## Support
@@ -131,4 +193,4 @@ Please refer to [LICENSE.md](LICENSE.md) file for details
 * If you need any support or assistance, we are here to help you: [Zoom Developer Community Forum](https://devforum.zoom.us/);
 
 ---
-Copyright ©2019 Zoom Video Communications, Inc. All rights reserved.
+Copyright ©2020 Zoom Video Communications, Inc. All rights reserved.

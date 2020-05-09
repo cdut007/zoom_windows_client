@@ -227,10 +227,14 @@ public:
 	virtual void onEndOtherMeetingToJoinMeetingNotification(IEndOtherMeetingToJoinMeetingHandler* handler_) = 0;
 };
 
+/*! \struct tagRedirectWarningMsgOption
+    \brief Determine if the user handles the corresponding type of the warning message with user's own program.
+    Here are more detailed structural descriptions.
+*/
 typedef struct tagRedirectWarningMsgOption
 {
-	bool bRedirectBadNetwork;
-	bool bRedirectWarnHighCPU;
+	bool bRedirectBadNetwork;///<TRUE indicates the user will handle the warning message of bad network with its own program.
+	bool bRedirectWarnHighCPU;///<TRUE indicates the user will handle the warning message of high cpu with its own program.
 	tagRedirectWarningMsgOption()
 	{
 		bRedirectBadNetwork = false;
@@ -494,6 +498,19 @@ public:
 	/// \param bRedirect TRUE indicates to handle with user's own program. FALSE not.
 	/// \remarks If the user calls this function to convert, the SDK will trigger the IMeetingUIControllerEvent::onAudioMenuBtnClicked(), and the user shall deal with the subsequent logic himself.
 	virtual void RedirectClickAudioMenuBTNEvent(bool bRedirect) = 0;
+
+	/// \brief Set if it is able to handle the event with SDK user's own program by clicking Breakout Room button in the meeting. Default value: FALSE.
+	/// \param bRedirect TRUE indicates to handle with user's own program. FALSE not.
+	/// \remarks If the user calls this function to convert, the SDK will trigger the IMeetingUIControllerEvent::onBreakoutRoomBtnClicked(), and the user shall deal with the subsequent logic himself.
+	virtual void RedirectClickBreakoutRoomButtonEvent(bool bRedirect) = 0;
+
+	/// \brief Set the visibility of reaction on meeting UI. Default is displaying.
+	/// \param [in] bHide TRUE means hiding, otherwise not.
+	virtual void HideReactionsOnMeetingUI(bool bHide) = 0;
+
+	/// \brief Set the visibility of meeting info button on meeting UI. Default is displaying.
+	/// \param [in] bHide TRUE means hiding, otherwise not.
+	virtual void HideMeetingInfoOnMeetingUI(bool bHide) = 0;
 };
 
 /// \brief Meeting connect configuration Interface
@@ -601,6 +618,7 @@ public:
 	/// \brief Set if it is able to limit the length of meeting ID. Default: FALSE.
 	/// \param bEnable TRUE indicates to limit the length of meeting ID. FALSE not.
 	/// \remarks If it is enabled, the length of the meeting ID depends on the ID type. The ID shall be more than nine(9) figures or five(5) letters.
+	/// Also, The meeting ID will be displayed as it is (not formatted).
 	virtual void EnableLengthLimitationOfMeetingNumber(bool bEnable) = 0;
 
 	/// \brief Set if it is able to share IOS device. Default: FALSE.
@@ -618,6 +636,11 @@ public:
 	/// \brief Set the maximum duration of the meeting when there is no attendee in the meeting. Default: 24*60.
 	/// \param nDuration Specify the maximum duration in minutes.
 	virtual void SetMaxDurationForOnlyHostInMeeting(int nDuration) = 0;
+
+	/// \brief Set if it is able to leave the meeting when the screen is locked or the screen saver is shown. Default: TRUE.
+	/// \param bEnable TRUE indicates to enable to share on the white board. FALSE not.
+	/// \remarks No matter what value you set for API, the callback IMeetingServiceEvent::onOSSessionChangedNotification will be triggered.
+	virtual void EnableLeaveMeetingWhenScreenLocked(bool bEnable) = 0;
 };
 
 END_ZOOM_SDK_NAMESPACE

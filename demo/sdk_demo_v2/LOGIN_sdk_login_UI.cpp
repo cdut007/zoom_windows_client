@@ -407,7 +407,10 @@ void CSDKWithoutLoginStartJoinMeetingUIGroup::onMeetingStatusChanged(ZOOM_SDK_NA
 			if(m_parentFrame)
 			{
 				m_parentFrame->SetCurrentPage(m_WithoutLoginStartJoinMeetingPage);
-				m_parentFrame->ShowErrorMessage(L"加入会议失败");
+				TCHAR szlog[MAX_PATH] = { 0 };
+				wsprintf(szlog, _T("加入会议失败:%d "), iResult);
+
+				m_parentFrame->ShowErrorMessage(szlog);
 			}
 		}
 		break;
