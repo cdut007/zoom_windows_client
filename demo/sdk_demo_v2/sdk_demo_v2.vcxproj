@@ -130,7 +130,7 @@
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\DuiLib\include;..\..\h;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\DuiLib\include;..\..\h;..\..\screen\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;UILIB_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -139,9 +139,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>DuiLib_2015.lib;sdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>DuiLib_2015.lib;sdk.lib;avcodec.lib;avformat.lib;avutil.lib;avdevice.lib;avfilter.lib;postproc.lib;swresample.lib;swscale.lib;SDL.lib;SDLmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\..\bin\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib;..\duilib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\duilib\lib;..\..\screen\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -149,6 +149,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -221,6 +222,13 @@
     <ClCompile Include="more_menu_ui.cpp" />
     <ClCompile Include="ParticipantPopMenu.cpp" />
     <ClCompile Include="participant_ui.cpp" />
+    <ClCompile Include="pushscreen\ffmpeg.cpp" />
+    <ClCompile Include="pushscreen\ffmpegEncoder.cpp" />
+    <ClCompile Include="pushscreen\libx264Master.cpp" />
+    <ClCompile Include="pushscreen\main.cpp" />
+    <ClCompile Include="pushscreen\MonitorMaster.cpp" />
+    <ClCompile Include="pushscreen\rgb2yuv.cpp" />
+    <ClCompile Include="pushscreen\web_stream.cpp" />
     <ClCompile Include="schedule_meeting_ui.cpp" />
     <ClCompile Include="schedule_meeting_workflow.cpp" />
     <ClCompile Include="sdk_demo_app.cpp" />
@@ -294,6 +302,13 @@
     <ClInclude Include="more_menu_ui.h" />
     <ClInclude Include="ParticipantPopMenu.h" />
     <ClInclude Include="participant_ui.h" />
+    <ClInclude Include="pushscreen\ffmpeg.h" />
+    <ClInclude Include="pushscreen\ffmpegEncoder.h" />
+    <ClInclude Include="pushscreen\libx264Master.h" />
+    <ClInclude Include="pushscreen\MonitorMaster.h" />
+    <ClInclude Include="pushscreen\rgb2yuv.h" />
+    <ClInclude Include="pushscreen\SDLMaster.h" />
+    <ClInclude Include="pushscreen\web_stream.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="schedule_meeting_ui.h" />
     <ClInclude Include="schedule_meeting_workflow.h" />

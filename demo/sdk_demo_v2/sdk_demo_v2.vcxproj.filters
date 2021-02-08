@@ -192,6 +192,27 @@
     </ClCompile>
     <ClCompile Include="SETTINGS_virtualBG_workflow.cpp" />
     <ClCompile Include="DownloadProgressWindow.cpp" />
+    <ClCompile Include="pushscreen\ffmpeg.cpp">
+      <Filter>Source Files\screen_record</Filter>
+    </ClCompile>
+    <ClCompile Include="pushscreen\ffmpegEncoder.cpp">
+      <Filter>Source Files\screen_record</Filter>
+    </ClCompile>
+    <ClCompile Include="pushscreen\libx264Master.cpp">
+      <Filter>Source Files\screen_record</Filter>
+    </ClCompile>
+    <ClCompile Include="pushscreen\main.cpp">
+      <Filter>Source Files\screen_record</Filter>
+    </ClCompile>
+    <ClCompile Include="pushscreen\MonitorMaster.cpp">
+      <Filter>Source Files\screen_record</Filter>
+    </ClCompile>
+    <ClCompile Include="pushscreen\rgb2yuv.cpp">
+      <Filter>Source Files\screen_record</Filter>
+    </ClCompile>
+    <ClCompile Include="pushscreen\web_stream.cpp">
+      <Filter>Source Files\screen_record</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sdk_demo_v2.h">
@@ -397,6 +418,27 @@
     </ClInclude>
     <ClInclude Include="SETTINGS_virtualBG_workflow.h" />
     <ClInclude Include="DownloadProgressWindow.h" />
+    <ClInclude Include="pushscreen\ffmpeg.h">
+      <Filter>Source Files\screen_record</Filter>
+    </ClInclude>
+    <ClInclude Include="pushscreen\ffmpegEncoder.h">
+      <Filter>Source Files\screen_record</Filter>
+    </ClInclude>
+    <ClInclude Include="pushscreen\libx264Master.h">
+      <Filter>Source Files\screen_record</Filter>
+    </ClInclude>
+    <ClInclude Include="pushscreen\MonitorMaster.h">
+      <Filter>Source Files\screen_record</Filter>
+    </ClInclude>
+    <ClInclude Include="pushscreen\rgb2yuv.h">
+      <Filter>Source Files\screen_record</Filter>
+    </ClInclude>
+    <ClInclude Include="pushscreen\SDLMaster.h">
+      <Filter>Source Files\screen_record</Filter>
+    </ClInclude>
+    <ClInclude Include="pushscreen\web_stream.h">
+      <Filter>Source Files\screen_record</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -470,6 +512,9 @@
     </Filter>
     <Filter Include="Source Files\4_other_features\2_schedule_meeting_for_login_user">
       <UniqueIdentifier>{1a4d5ec2-b8be-42b5-985d-bdf0588268bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\screen_record">
+      <UniqueIdentifier>{d61f0b43-770e-4248-a73d-709eaad334c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
